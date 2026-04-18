@@ -23,7 +23,7 @@ export function BudgetSlider({
         <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
           Filter by price
         </span>
-        <span className="text-sm font-bold text-gift-600">≤ ${value}</span>
+        <span className="text-sm font-bold text-phia-600">≤ ${value}</span>
       </div>
       <input
         type="range"

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Tuple
 
@@ -22,7 +23,7 @@ def _search_one(query: str, budget_min: float, budget_max: float) -> List[dict]:
         "q": query,
         "tbm": "shop",
         "api_key": _SERPAPI_KEY,
-        "num": 8,
+        "num": 15,
         "gl": "us",
         "hl": "en",
     }
@@ -32,7 +33,7 @@ def _search_one(query: str, budget_min: float, budget_max: float) -> List[dict]:
         items = r.json().get("shopping_results", [])
         return [
             i for i in items
-            if budget_min * 0.8 <= float(i.get("extracted_price") or 0) <= budget_max * 1.2
+            if budget_min * 0.7 <= float(i.get("extracted_price") or 0) <= budget_max * 1.3
             and i.get("extracted_price")
         ]
     except Exception:
@@ -43,11 +44,13 @@ def _infer_category(title: str) -> str:
     t = title.lower()
     if any(w in t for w in ["football", "soccer", "jersey", "messi", "fifa", "cleat", "goal net"]):
         return "Football & Soccer"
-    if any(w in t for w in ["harry potter", "hogwarts", "wand", "gryffindor", "slytherin"]):
+    if any(w in t for w in ["cricket", "bat", "wicket", "dhoni", "ipl", "stumps"]):
+        return "Cricket & Sports"
+    if any(w in t for w in ["harry potter", "hogwarts", "wand", "gryffindor", "slytherin", "marauder"]):
         return "Fandom & Collectibles"
     if any(w in t for w in ["funko", "collectible", "figurine", "action figure", "manga", "anime", "marvel", "lego"]):
         return "Fandom & Collectibles"
-    if any(w in t for w in ["camera", "lens", "tripod", "photography", "photo", "flash", "mirrorless"]):
+    if any(w in t for w in ["camera", "lens", "tripod", "photography", "photo", "flash", "mirrorless", "polaroid", "instax"]):
         return "Photography"
     if any(w in t for w in ["coffee", "espresso", "kettle", "pour over", "grinder", "french press"]):
         return "Kitchen & Food"
@@ -74,22 +77,47 @@ def _infer_category(title: str) -> str:
     return "Gifts & More"
 
 
-def _to_product(raw: dict, uid: str) -> Product:
-    title = raw.get("title", "Unknown Product")[:100]
+def _to_product(raw: dict, uid: str, query_tag: str) -> Product:
+    title = raw.get("title", "Unknown Product")[:120]
     snippet = raw.get("snippet") or f"Available on {raw.get('source', 'Google Shopping')}."
+    source = raw.get("source", "")
+
+    # Product URL: prefer product_link (Google Shopping redirect), then link
+    product_url = raw.get("product_link") or raw.get("link") or ""
+
     return Product(
         id=uid,
         name=title,
         category=_infer_category(title),
-        tags=[],
+        tags=[query_tag],
         price=float(raw.get("extracted_price", 0)),
-        rating=float(raw.get("rating") or 4.2),
+        rating=float(raw.get("rating") or 0),
         review_count=int(raw.get("reviews") or 0),
         occasions=["general"],
         image_url=raw.get("thumbnail", ""),
         description=snippet,
-        affiliate_url=raw.get("link", "#"),
+        affiliate_url=product_url,
+        source=source,
     )
+
+
+def _enforce_diversity(
+    candidates: List[CandidateTuple], max_per_category: int = 4
+) -> List[CandidateTuple]:
+    """Ensure no single category dominates the candidate pool."""
+    by_cat: defaultdict[str, list[CandidateTuple]] = defaultdict(list)
+    for c in candidates:
+        by_cat[c[0].category].append(c)
+
+    result: list[CandidateTuple] = []
+    # First pass: take up to max_per_category from each
+    for cat_items in by_cat.values():
+        cat_items.sort(key=lambda x: x[1], reverse=True)
+        result.extend(cat_items[:max_per_category])
+
+    # Sort by score
+    result.sort(key=lambda x: x[1], reverse=True)
+    return result
 
 
 def search_products_parallel(
@@ -97,7 +125,7 @@ def search_products_parallel(
 ) -> Tuple[List[CandidateTuple], int]:
     raw_by_query: dict[str, List[dict]] = {}
 
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=8) as executor:
         future_map = {executor.submit(_search_one, q, budget_min, budget_max): q for q in queries}
         for future in as_completed(future_map):
             q = future_map[future]
@@ -105,28 +133,33 @@ def search_products_parallel(
 
     seen_titles: set[str] = set()
     candidates: List[CandidateTuple] = []
+    total_raw = 0
 
     for q_idx, query in enumerate(queries):
+        # Use first meaningful word of query as a tag
+        query_tag = query.split()[0].lower() if query else "general"
         for p_idx, raw in enumerate(raw_by_query.get(query, [])):
-            title_key = (raw.get("title", "")[:35]).lower().strip()
+            total_raw += 1
+            title_key = (raw.get("title", "")[:40]).lower().strip()
             if title_key in seen_titles:
                 continue
             seen_titles.add(title_key)
 
             uid = f"serp_{q_idx}_{p_idx}"
-            product = _to_product(raw, uid)
+            product = _to_product(raw, uid, query_tag)
             wilson = wilson_lower_bound(product.rating, product.review_count)
-            # Base relevance — Claude will re-rank properly
             candidates.append((product, 0.5 + wilson * 0.3, wilson, []))
 
-    return candidates, len(candidates)
+    # Enforce diversity BEFORE sending to Claude
+    diverse = _enforce_diversity(candidates, max_per_category=4)
+    return diverse, total_raw
 
 
 def get_candidates_with_fallback(
-    queries: List[str], profile: "RecipientProfile", top_n: int = 12
+    queries: List[str], profile: "RecipientProfile", top_n: int = 24
 ) -> Tuple[List[CandidateTuple], int, bool]:
     """Returns (candidates, total, used_live_search)."""
-    from models.recipient import RecipientProfile  # local import avoids circular
+    from models.recipient import RecipientProfile
 
     if not is_available():
         c, t = get_candidates(profile, top_n=top_n)
@@ -134,10 +167,9 @@ def get_candidates_with_fallback(
 
     live, total = search_products_parallel(queries, profile.budget_min, profile.budget_max)
 
-    if len(live) < 4:
-        # Not enough live results — pad with curated catalog
-        curated, _ = get_candidates(profile, top_n=top_n)
+    if len(live) < 8:
+        curated, ct = get_candidates(profile, top_n=top_n)
         merged = live + [c for c in curated if c[0].id not in {x[0].id for x in live}]
-        return merged[:top_n], total + _, bool(live)
+        return merged[:top_n], total + ct, bool(live)
 
     return live[:top_n], total, True

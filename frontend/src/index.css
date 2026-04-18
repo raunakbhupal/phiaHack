@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,41 +9,45 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-
   body {
-    @apply bg-orange-50 text-gray-900;
+    @apply bg-white text-gray-900 font-sans;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gift-500 px-6 py-3 font-semibold text-white shadow-lg
-      transition-all duration-200 hover:bg-gift-600 hover:shadow-xl hover:-translate-y-0.5
-      focus:outline-none focus:ring-2 focus:ring-gift-400 focus:ring-offset-2
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-phia-600 px-6 py-3 font-semibold text-white
+      transition-all duration-200 hover:bg-phia-700 hover:shadow-lg hover:shadow-phia-200
+      focus:outline-none focus:ring-2 focus:ring-phia-400 focus:ring-offset-2
       disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none;
   }
-
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border-2 border-phia-200 bg-white px-6 py-3 font-semibold text-phia-700
+      transition-all duration-200 hover:bg-phia-50 hover:border-phia-300
+      focus:outline-none focus:ring-2 focus:ring-phia-400 focus:ring-offset-2;
+  }
   .btn-ghost {
-    @apply inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-600
-      transition-colors hover:bg-white hover:text-gray-900;
+    @apply inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-gray-500
+      transition-colors hover:bg-gray-100 hover:text-gray-900;
   }
-
   .card {
-    @apply rounded-2xl bg-white shadow-md ring-1 ring-black/5;
+    @apply rounded-2xl bg-white border border-gray-100 shadow-sm;
   }
-
   .pill {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
   }
-
-  .score-label-text {
-    font-family: "Playfair Display", serif;
-  }
 }
 
-/* Gift card stagger animation */
+/* Animations */
 .gift-card-enter {
   animation: fadeSlideUp 0.4s ease-out both;
+}
+.animate-fade-slide-up {
+  animation: fadeSlideUp 0.3s ease-out both;
+}
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Loading dots */
@@ -50,24 +56,26 @@
 }
 .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
 .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-
 @keyframes loadingDot {
   0%, 80%, 100% { transform: scale(0); opacity: 0; }
   40% { transform: scale(1); opacity: 1; }
 }
 
-/* Custom range input styling */
+/* Pulse ring for loading */
+@keyframes pulseRing {
+  0% { transform: scale(1); opacity: 0.4; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+.animate-pulse-ring {
+  animation: pulseRing 2s ease-out infinite;
+}
+
+/* Range input */
 input[type="range"] {
-  accent-color: #f97316;
+  accent-color: #9333ea;
 }
 
 /* Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-gray-300;
-}
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { @apply rounded-full bg-gray-200; }

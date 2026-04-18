@@ -1,43 +1,30 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
-      fontFamily: {
-        display: ["Playfair Display", "Georgia", "serif"],
-      },
       colors: {
-        gift: {
-          50: "#fff7ed",
-          100: "#ffedd5",
-          200: "#fed7aa",
-          300: "#fdba74",
-          400: "#fb923c",
-          500: "#f97316",
-          600: "#ea580c",
-          700: "#c2410c",
-          800: "#9a3412",
-          900: "#7c2d12",
+        phia: {
+          50:  "#faf5ff",
+          100: "#f3e8ff",
+          200: "#e9d5ff",
+          300: "#d8b4fe",
+          400: "#c084fc",
+          500: "#a855f7",
+          600: "#9333ea",
+          700: "#7e22ce",
+          800: "#6b21a8",
+          900: "#581c87",
+        },
+        warm: {
+          50:  "#fffbeb",
+          100: "#fef3c7",
+          200: "#fde68a",
         },
       },
-      animation: {
-        "fade-slide-up": "fadeSlideUp 0.4s ease-out both",
-        "pulse-ring": "pulseRing 2s ease-in-out infinite",
-        shimmer: "shimmer 2s linear infinite",
-      },
-      keyframes: {
-        fadeSlideUp: {
-          from: { opacity: "0", transform: "translateY(24px)" },
-          to: { opacity: "1", transform: "translateY(0)" },
-        },
-        pulseRing: {
-          "0%, 100%": { transform: "scale(1)", opacity: "0.8" },
-          "50%": { transform: "scale(1.5)", opacity: "0" },
-        },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% center" },
-          "100%": { backgroundPosition: "200% center" },
-        },
+      fontFamily: {
+        display: ['"DM Serif Display"', "Georgia", "serif"],
+        sans: ['"Inter"', "system-ui", "sans-serif"],
       },
     },
   },

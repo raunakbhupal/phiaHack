@@ -30,6 +30,7 @@ export interface Product {
   image_url: string;
   description: string;
   affiliate_url: string;
+  source: string;
 }
 
 export interface GiftResult {
@@ -39,6 +40,7 @@ export interface GiftResult {
   match_score: number;
   explanation: string;
   tag_overlap: string[];
+  why_this_store: string | null;
 }
 
 export interface FindGiftsResponse {
@@ -47,7 +49,20 @@ export interface FindGiftsResponse {
   total_candidates: number;
 }
 
-export type AppPhase = "idle" | "parsing" | "searching" | "ranking" | "done" | "error";
+export interface FollowUpResponse {
+  needs_followup: boolean;
+  questions: string[];
+}
+
+export interface RefineRequest {
+  description: string;
+  budget_min: number;
+  budget_max: number;
+  occasion: string;
+  additional_context: string;
+}
+
+export type AppPhase = "idle" | "followup" | "parsing" | "searching" | "ranking" | "done" | "error";
 
 export interface GiftMessageRequest {
   product_name: string;

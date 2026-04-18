@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -19,6 +19,7 @@ class Product(BaseModel):
     image_url: str
     description: str
     affiliate_url: str
+    source: str = ""
 
 
 class GiftResult(BaseModel):
@@ -28,6 +29,7 @@ class GiftResult(BaseModel):
     match_score: int
     explanation: str
     tag_overlap: List[str]
+    why_this_store: Optional[str] = None
 
 
 class FindGiftsResponse(BaseModel):

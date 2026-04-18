@@ -1,9 +1,11 @@
 import type {
   FindGiftsResponse,
+  FollowUpResponse,
   GiftMessageRequest,
   GiftMessageResponse,
   RecipientInput,
   RecipientProfile,
+  RefineRequest,
 } from "../types";
 
 async function post<T>(path: string, body: unknown): Promise<T> {
@@ -19,11 +21,15 @@ async function post<T>(path: string, body: unknown): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export function checkFollowUp(input: RecipientInput): Promise<FollowUpResponse> {
+  return post<FollowUpResponse>("/api/check-followup", input);
+}
+
 export function parseRecipient(input: RecipientInput): Promise<RecipientProfile> {
   return post<RecipientProfile>("/api/parse-recipient", input);
 }
 
-export function findGifts(input: RecipientInput): Promise<FindGiftsResponse> {
+export function findGifts(input: RefineRequest): Promise<FindGiftsResponse> {
   return post<FindGiftsResponse>("/api/find-gifts", input);
 }
 

@@ -11,46 +11,52 @@ export function SearchPage() {
   const { error } = useGiftState();
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(135deg, #fff7ed 0%, #fef3c7 40%, #fce7f3 100%)" }}>
-      {/* Header */}
-      <header className="px-6 py-5 flex items-center justify-between max-w-7xl mx-auto w-full">
-        <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-lg bg-gift-500 flex items-center justify-center text-white text-base font-bold shadow">🎁</div>
-          <span className="font-display text-xl font-bold text-gray-900">phia</span>
+    <div className="min-h-screen flex flex-col bg-white">
+      {/* Nav */}
+      <header className="px-6 py-4 flex items-center justify-between max-w-6xl mx-auto w-full">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-phia-500 to-phia-700 flex items-center justify-center text-white text-sm font-bold shadow-sm">
+            ✦
+          </div>
+          <span className="font-display text-xl text-gray-900">phia gifts</span>
         </div>
-        <div className="hidden sm:flex items-center gap-2 rounded-full bg-white/70 backdrop-blur px-4 py-1.5 text-sm text-gray-500 shadow-sm">
-          <span className="h-2 w-2 rounded-full bg-green-400 inline-block" />
+        <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400 font-medium">
+          <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block" />
           Powered by Claude AI
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 max-w-7xl mx-auto w-full">
+      <main className="flex-1 flex flex-col items-center justify-center px-4 pb-16">
         <div className="w-full max-w-2xl">
-          {/* Hero text */}
-          <div className="text-center mb-10">
-            <h1 className="font-display text-5xl sm:text-6xl font-bold text-gray-900 leading-[1.1] mb-5">
-              Stop guessing.
+          {/* Hero */}
+          <div className="text-center mb-12">
+            <p className="text-phia-600 font-semibold text-sm tracking-wide uppercase mb-4">
+              AI Gift Discovery
+            </p>
+            <h1 className="font-display text-5xl sm:text-6xl text-gray-900 leading-[1.08] mb-6">
+              Find gifts they'll
               <br />
-              <span className="text-gift-500 italic">Start gifting.</span>
+              <span className="text-phia-600 italic">actually love.</span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-xl mx-auto leading-relaxed">
-              Describe the person — not the product. Our AI understands who they are and searches the internet for gifts made for <em>them</em>.
+            <p className="text-lg text-gray-500 max-w-lg mx-auto leading-relaxed">
+              Describe the person — not the product. Our AI searches the internet
+              and finds gifts matched to their personality, interests, and your budget.
             </p>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+            <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-600">
               <strong>Something went wrong:</strong> {error}
             </div>
           )}
 
-          {/* Main form card */}
+          {/* Form */}
           <RecipientForm />
 
-          {/* Example prompts */}
-          <div className="mt-8">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 text-center mb-3">
+          {/* Examples */}
+          <div className="mt-10">
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-300 text-center mb-4">
               Try an example
             </p>
             <div className="flex flex-col gap-2">
@@ -65,34 +71,33 @@ export function SearchPage() {
                       textarea.dispatchEvent(new Event("input", { bubbles: true }));
                     }
                   }}
-                  className="text-left text-sm text-gray-500 rounded-lg bg-white/60 hover:bg-white px-4 py-2.5 transition-colors border border-white/80 hover:border-gray-200 hover:text-gray-800 line-clamp-1"
+                  className="text-left text-sm text-gray-400 rounded-xl bg-gray-50 hover:bg-phia-50 px-5 py-3 transition-all border border-transparent hover:border-phia-100 hover:text-gray-600 line-clamp-1"
                 >
-                  <span className="text-gift-500 font-semibold mr-1">→</span>
+                  <span className="text-phia-400 mr-2">→</span>
                   {ex}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Stats row */}
-          <div className="mt-10 grid grid-cols-3 gap-4">
+          {/* Stats */}
+          <div className="mt-12 grid grid-cols-3 gap-6">
             {[
-              { icon: "🌍", value: "Any store", label: "Amazon, Etsy & more" },
-              { icon: "🎯", value: "Personalised", label: "Not just star ratings" },
-              { icon: "⚡", value: "~15 seconds", label: "Live product search" },
-            ].map(({ icon, value, label }) => (
-              <div key={value} className="text-center rounded-xl bg-white/60 backdrop-blur-sm px-3 py-4 shadow-sm">
-                <div className="text-2xl mb-1">{icon}</div>
-                <div className="font-bold text-gray-900 text-sm">{value}</div>
-                <div className="text-xs text-gray-500">{label}</div>
+              { value: "Multi-store", sub: "Amazon, Etsy, Target & more" },
+              { value: "AI-ranked", sub: "Reviews + sentiment + fit" },
+              { value: "12 picks", sub: "Diverse across all interests" },
+            ].map(({ value, sub }) => (
+              <div key={value} className="text-center">
+                <div className="font-semibold text-gray-900 text-sm">{value}</div>
+                <div className="text-xs text-gray-400 mt-0.5">{sub}</div>
               </div>
             ))}
           </div>
         </div>
       </main>
 
-      <footer className="py-4 text-center text-xs text-gray-400">
-        Phia Hackathon — AI-Powered Personalised Gift Discovery
+      <footer className="py-4 text-center text-xs text-gray-300">
+        Built for Phia Hackathon · AI-Powered Gift Discovery
       </footer>
     </div>
   );

@@ -53,7 +53,7 @@ export function GiftMessageModal({
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-gift-600 mb-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-phia-600 mb-1">
               ✍️ Gift Note
             </p>
             <h3 className="font-semibold text-gray-900 line-clamp-1">
@@ -73,9 +73,9 @@ export function GiftMessageModal({
           {loading ? (
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <div className="loading-dots flex gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-gift-400 block" />
-                <span className="h-1.5 w-1.5 rounded-full bg-gift-400 block" />
-                <span className="h-1.5 w-1.5 rounded-full bg-gift-400 block" />
+                <span className="h-1.5 w-1.5 rounded-full bg-phia-400 block" />
+                <span className="h-1.5 w-1.5 rounded-full bg-phia-400 block" />
+                <span className="h-1.5 w-1.5 rounded-full bg-phia-400 block" />
               </div>
               <span>Writing your gift note...</span>
             </div>

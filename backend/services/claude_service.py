@@ -24,6 +24,35 @@ def _get_client() -> anthropic.Anthropic:
         _client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     return _client
 
+_FOLLOWUP_SYSTEM = """You are a gifting assistant. Analyze the user's gift description and decide if you need more information to find great gifts.
+
+Return ONLY a valid JSON object — no markdown, no explanation.
+
+Schema:
+{
+  "needs_followup": boolean,
+  "questions": [string] (1-3 short questions, only if needs_followup is true)
+}
+
+Ask follow-up questions ONLY if the description is missing critical details that would significantly change the gift recommendations. You should ask if:
+- Age/age range is completely unclear AND would matter (e.g., gifts for a 10-year-old vs 40-year-old are very different)
+- No interests or hobbies are mentioned at all
+- The occasion is ambiguous and could change the gift type significantly
+- Budget expectations are unclear AND the description hints at either very cheap or very expensive taste
+
+DO NOT ask follow-ups if:
+- The description already has 2+ clear interests/hobbies
+- Age can be reasonably inferred (e.g., "my college friend" → ~20s)
+- The occasion is already specified in the form
+- You're just being overly thorough — bias toward ACTION over questions
+
+Keep questions short, friendly, and specific. Max 3 questions. Examples:
+- "How old is Jake? Gift ideas vary a lot by age."
+- "Any hobbies or things they're into lately?"
+- "Is this for a milestone birthday or just a casual gift?"
+
+If the description is rich enough, return: {"needs_followup": false, "questions": []}"""
+
 _PARSE_SYSTEM = """You are a gifting intelligence assistant. Parse a natural language description of a gift recipient into a structured JSON profile used to match products.
 
 Return ONLY a valid JSON object — no markdown fences, no explanation.
@@ -46,6 +75,7 @@ CRITICAL DISTINCTION — Fandoms vs Hobbies:
 - "Loves Harry Potter" = they are a FAN of the franchise → tags: ["harry-potter", "fandom", "collectible", "hogwarts"] — DO NOT add "reading" or "books" unless they explicitly say they love reading
 - "Loves football / soccer" = sports fan → tags: ["football", "soccer", "sports", "fan", "training"]
 - "Messi fan / admirer" → add: ["messi", "argentina", "football", "soccer"]
+- "Dhoni fan / cricket" → add: ["dhoni", "cricket", "csk", "india-cricket", "sports"]
 - "Loves photography / taking photos" → tags: ["photography", "camera", "visual-art", "creative"]
 - "Reads a lot / bookworm / loves reading" → ONLY THEN add: ["reading", "books", "fiction"]
 - "Loves Star Wars / Marvel / anime" → tags: ["fandom", "collectible", "{franchise-name}"]
@@ -66,41 +96,65 @@ Tag vocabulary (use these for other interests):
 - coder / developer → ["coding", "programming", "tech", "productivity"]
 - plant lover → ["plants", "gardening", "succulents", "nature"]
 - wine / cocktail lover → ["wine", "cocktails", "mixology", "spirits", "entertaining"]
+- cricket fan → ["cricket", "bat", "sports", "india-cricket", "ipl"]
 
 Rules:
-1. interests: 4-8 tags, all lowercase with hyphens — BE SPECIFIC to the person, not generic
+1. interests: 5-10 tags, all lowercase with hyphens — BE SPECIFIC to the person, not generic
 2. personality_traits: 3-5 lowercase adjectives (adventurous, creative, passionate, etc.)
 3. summary_sentence: warm, specific, 15-30 words referencing actual details from the description
 4. Infer occasion from context if possible; default to provided occasion
 5. Use budget defaults if not mentioned in description
 6. Never add "books" or "reading" just because someone likes a book-based franchise"""
 
-_SCORE_SYSTEM = """You are a gifting expert who finds deeply personal, thoughtful gifts. Given a recipient profile and candidate products, select the best 6, score them, and explain why each is a great fit.
+_SCORE_SYSTEM = """You are a gifting expert who finds deeply personal, thoughtful gifts. Given a recipient profile and candidate products, select the BEST 12 gifts and score them.
 
-Return ONLY a JSON array — no markdown, no preamble. Exactly 6 elements.
+CRITICAL RULES:
+1. You MUST return EXACTLY 12 results — no fewer.
+2. DIVERSITY IS MANDATORY: Select gifts across AT LEAST 4 different categories. Never return more than 3 items from the same category.
+3. Cover EVERY major interest of the recipient — if they like cricket AND Harry Potter AND photography, include gifts for ALL three.
+4. Mix price points — include some affordable options and some premium ones within budget.
+5. Prefer products with higher review counts AND higher ratings — a 4.5★ product with 2000 reviews beats a 5★ product with 3 reviews.
+6. Consider the STORE/SOURCE — note if a product comes from a well-known retailer.
+
+Return ONLY a JSON array — no markdown, no preamble. Exactly 12 elements.
 
 Each element:
 {
   "product_id": string,
-  "match_score": integer,
-  "explanation": string
+  "match_score": integer (50-99),
+  "explanation": string,
+  "why_this_store": string | null
 }
 
 Scoring:
-- 90-100: Directly targets a core interest + fits occasion perfectly
-- 75-89: Hits 2+ interests or strong personality match
-- 60-74: Tangential but still meaningful
-- 50-59: Acceptable if nothing better available
+- 90-99: Directly targets a core interest + perfect occasion fit + great reviews
+- 80-89: Strong match on 2+ interests, good reviews
+- 70-79: Solid match on one interest with good quality signals
+- 60-69: Tangential but thoughtful connection
+- 50-59: Acceptable filler
 
 Explanation rules:
-- 2-3 sentences, must reference at least one specific interest or trait
-- Second sentence: why it works for the occasion
-- Never be generic ("this is great for anyone who likes...")
-- Be specific and warm
+- 2-3 sentences, MUST reference specific interests or traits from the profile
+- Explain WHY this gift connects to THEM personally — not generic praise
+- If the product has strong reviews, mention it as a trust signal
+- Be warm and specific
 
-IMPORTANT: Prefer products with higher review counts — they represent greater confidence in quality."""
+why_this_store rules:
+- If the source is a well-known store (Amazon, Etsy, Target, etc.), note it briefly
+- e.g. "Top-rated on Amazon with verified reviews" or "Handcrafted seller on Etsy"
+- null if source is unknown"""
 
-_QUERY_SYSTEM = """You generate targeted Google Shopping search queries to find ideal gifts. Return ONLY a JSON array of 5 query strings — no markdown, no explanation."""
+_QUERY_SYSTEM = """You generate targeted Google Shopping search queries to find ideal gifts.
+
+ABSOLUTE RULES — VIOLATION = FAILURE:
+1. You MUST generate EXACTLY 8 queries
+2. You MUST cover EVERY distinct interest the recipient has — if they like football, Harry Potter, AND photography, there MUST be at least 2 queries for EACH interest
+3. NO TWO queries may return the same type of product (e.g., two different jersey queries = FAILURE)
+4. Mix product TYPES across queries: merchandise, equipment, accessories, decor, books, gadgets, apparel, art
+5. At least 1 query must be a creative crossover combining two interests (e.g., "Harry Potter camera strap photography gift")
+6. At least 1 query must be for something unexpected/unique they wouldn't think to search for themselves
+
+Return ONLY a JSON array of 8 query strings — no markdown, no explanation."""
 
 _MESSAGE_SYSTEM = """You write warm, personal gift card messages. Return ONLY the message text — no quotes, no markdown."""
 
@@ -111,6 +165,23 @@ def _extract_json(text: str) -> str:
     if match:
         return match.group(1).strip()
     return text
+
+
+def check_followup(inp: RecipientInput) -> dict:
+    """Check if we need follow-up questions before searching."""
+    user_msg = (
+        f"Description: {inp.description}\n"
+        f"Occasion: {inp.occasion}\n"
+        f"Budget: ${inp.budget_min:.0f}–${inp.budget_max:.0f}"
+    )
+    response = _get_client().messages.create(
+        model=_MODEL,
+        max_tokens=300,
+        system=_FOLLOWUP_SYSTEM,
+        messages=[{"role": "user", "content": user_msg}],
+    )
+    raw = _extract_json(response.content[0].text)
+    return json.loads(raw)
 
 
 def parse_recipient(inp: RecipientInput) -> RecipientProfile:
@@ -150,17 +221,20 @@ def score_and_explain(
             "tags": product.tags,
             "description": product.description,
             "occasions": product.occasions,
+            "rating": product.rating,
+            "review_count": product.review_count,
+            "source": product.source,
             "algorithm_score": round(rel, 3),
             "matched_tags": matched,
         })
 
     user_msg = (
         f"Recipient Profile:\n{profile_json}\n\n"
-        f"Candidate Products:\n{json.dumps(candidates_payload, indent=2)}"
+        f"Candidate Products ({len(candidates_payload)} items):\n{json.dumps(candidates_payload, indent=2)}"
     )
     response = _get_client().messages.create(
         model=_MODEL,
-        max_tokens=2048,
+        max_tokens=4096,
         system=_SCORE_SYSTEM,
         messages=[{"role": "user", "content": user_msg}],
     )
@@ -168,7 +242,7 @@ def score_and_explain(
     scored = json.loads(raw)
 
     results: list[GiftResult] = []
-    for item in scored[:6]:
+    for item in scored[:12]:
         pid = item["product_id"]
         if pid not in product_map:
             continue
@@ -181,13 +255,14 @@ def score_and_explain(
                 match_score=int(item["match_score"]),
                 explanation=item["explanation"],
                 tag_overlap=matched,
+                why_this_store=item.get("why_this_store"),
             )
         )
 
-    # Fallback: if LLM returned fewer than 6, fill from remaining candidates
+    # Fallback: fill to 12 from remaining candidates
     seen_ids = {r.product.id for r in results}
     for product, rel, wilson, matched in candidates:
-        if len(results) >= 6:
+        if len(results) >= 12:
             break
         if product.id not in seen_ids:
             results.append(
@@ -198,33 +273,37 @@ def score_and_explain(
                     match_score=60,
                     explanation=f"A well-reviewed {product.category.lower()} pick that fits the budget and occasion.",
                     tag_overlap=matched,
+                    why_this_store=f"Available on {product.source}" if product.source else None,
                 )
             )
     return results
 
 
 def generate_gift_queries(profile: RecipientProfile) -> List[str]:
-    interests_str = ", ".join(profile.interests[:6]) if profile.interests else "general gifts"
-    traits_str = ", ".join(profile.personality_traits[:3]) if profile.personality_traits else ""
+    # Group interests into distinct themes for the prompt
+    interests_str = ", ".join(profile.interests[:10]) if profile.interests else "general gifts"
+    traits_str = ", ".join(profile.personality_traits[:4]) if profile.personality_traits else ""
     user_msg = (
         f"Recipient: {profile.name_hint or 'someone'}, {profile.age_range or 'adult'}, {profile.relationship}\n"
         f"Occasion: {profile.occasion}, Budget: ${profile.budget_min:.0f}–${profile.budget_max:.0f}\n"
-        f"Interests: {interests_str}\n"
+        f"ALL interests (MUST cover each one): {interests_str}\n"
         f"Personality: {traits_str}\n"
         f"About them: {profile.summary_sentence}\n\n"
-        f"Generate 5 specific Google Shopping search queries that will surface the most relevant gift products. "
-        f"Each query must target a DIFFERENT interest. Be very specific — e.g. 'Argentina Messi jersey gift' not 'sports gift'. "
-        f"Include budget-appropriate product types. Return ONLY a JSON array: [\"query1\", ...]"
+        f"Generate 8 Google Shopping queries. MANDATORY: at least 2 queries per major interest area. "
+        f"The interests are: {interests_str}. "
+        f"Each query must target a DIFFERENT product type (jersey, figurine, equipment, book, accessory, decor, gadget, art). "
+        f"Be very specific — e.g. 'Messi Argentina signed poster wall art' not 'football gift'. "
+        f"Return ONLY a JSON array: [\"query1\", ...]"
     )
     response = _get_client().messages.create(
         model=_MODEL,
-        max_tokens=300,
+        max_tokens=500,
         system=_QUERY_SYSTEM,
         messages=[{"role": "user", "content": user_msg}],
     )
     raw = _extract_json(response.content[0].text)
     queries = json.loads(raw)
-    return [str(q) for q in queries[:5]]
+    return [str(q) for q in queries[:8]]
 
 
 def generate_gift_message(
