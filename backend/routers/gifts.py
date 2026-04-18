@@ -34,6 +34,7 @@ class RefineRequest(BaseModel):
     budget_max: float = 100
     occasion: str = "birthday"
     additional_context: str = ""
+    gender: str = "not specified"
 
 
 @router.post("/check-followup", response_model=FollowUpResponse)
@@ -70,6 +71,7 @@ def find_gifts(body: RefineRequest) -> FindGiftsResponse:
             budget_min=body.budget_min,
             budget_max=body.budget_max,
             occasion=body.occasion,
+            gender=body.gender,
         )
 
         # Step 1: Understand the recipient
@@ -79,7 +81,7 @@ def find_gifts(body: RefineRequest) -> FindGiftsResponse:
         if serpapi_service.is_available():
             queries = claude_service.generate_gift_queries(profile)
             candidates, total, _ = serpapi_service.get_candidates_with_fallback(
-                queries, profile, top_n=24
+                queries, profile, top_n=16
             )
         else:
             candidates, total = catalog_service.get_candidates(profile, top_n=16)
@@ -115,6 +117,36 @@ class PriceOption(BaseModel):
 class CompareResponse(BaseModel):
     product_name: str
     options: List[PriceOption]
+
+
+def _store_search_url(store: str, product_name: str) -> str:
+    """Build a direct search URL for known stores."""
+    s = store.lower().strip()
+    q = product_name
+    if "amazon" in s:
+        return f"https://www.amazon.com/s?k={q}"
+    if "walmart" in s:
+        return f"https://www.walmart.com/search?q={q}"
+    if "target" in s:
+        return f"https://www.target.com/s?searchTerm={q}"
+    if "etsy" in s:
+        return f"https://www.etsy.com/search?q={q}"
+    if "ebay" in s:
+        return f"https://www.ebay.com/sch/i.html?_nkw={q}"
+    if "best buy" in s:
+        return f"https://www.bestbuy.com/site/searchpage.jsp?st={q}"
+    if "barnes" in s or "noble" in s:
+        return f"https://www.barnesandnoble.com/s/{q}"
+    if "kohls" in s or "kohl" in s:
+        return f"https://www.kohls.com/search.jsp?search={q}"
+    if "macy" in s:
+        return f"https://www.macys.com/shop/featured/{q}"
+    if "nordstrom" in s:
+        return f"https://www.nordstrom.com/sr?keyword={q}"
+    if "poshmark" in s:
+        return f"https://poshmark.com/search?query={q}"
+    # Fallback: Google Shopping filtered by store
+    return f"https://www.google.com/search?tbm=shop&q={q}+site:{store}"
 
 
 @router.post("/compare-prices", response_model=CompareResponse)
@@ -153,7 +185,7 @@ def compare_prices(body: CompareRequest) -> CompareResponse:
                 price=price,
                 rating=float(item.get("rating") or 0),
                 review_count=int(item.get("reviews") or 0),
-                url=item.get("product_link") or "",
+                url=_store_search_url(store, body.product_name),
                 thumbnail=item.get("thumbnail") or "",
             ))
 

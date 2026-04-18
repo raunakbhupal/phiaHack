@@ -8,6 +8,7 @@ export function RecipientForm() {
   const [budgetMin, setBudgetMin] = useState("25");
   const [budgetMax, setBudgetMax] = useState("100");
   const [occasion, setOccasion] = useState("birthday");
+  const [gender, setGender] = useState("not specified");
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const charCount = description.length;
@@ -22,7 +23,7 @@ export function RecipientForm() {
       setValidationError("Max budget must be greater than min budget.");
       return;
     }
-    submitSearch(description, min, max, occasion);
+    submitSearch(description, min, max, occasion, gender);
   }
 
   return (
@@ -50,8 +51,8 @@ export function RecipientForm() {
         </div>
       </div>
 
-      {/* Budget + Occasion */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* Budget + Occasion + Gender */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div>
           <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Min Budget</label>
           <div className="relative">
@@ -82,6 +83,19 @@ export function RecipientForm() {
               focus:outline-none focus:ring-2 focus:ring-phia-300 focus:border-transparent focus:bg-white transition-all"
           >
             {OCCASIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Gender</label>
+          <select
+            value={gender} onChange={(e) => setGender(e.target.value)}
+            className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm text-gray-900
+              focus:outline-none focus:ring-2 focus:ring-phia-300 focus:border-transparent focus:bg-white transition-all"
+          >
+            <option value="not specified">Prefer not to say</option>
+            <option value="male">👨 Male</option>
+            <option value="female">👩 Female</option>
+            <option value="non-binary">🧑 Non-binary</option>
           </select>
         </div>
       </div>

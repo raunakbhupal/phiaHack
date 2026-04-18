@@ -153,43 +153,43 @@ function WhyModal({
 }) {
   const { product, match_score, explanation, tag_overlap, why_this_store, wilson_score } = result;
   const amazonUrl = buildAmazonUrl(product.name, product.price);
-  const compareUrl = result.product.affiliate_url || buildGoogleShoppingUrl(product.name);
+  const [prices, setPrices] = useState<PriceOption[]>([]);
+  const [loadingPrices, setLoadingPrices] = useState(false);
+  const [showPrices, setShowPrices] = useState(false);
+
+  const handleCompare = () => {
+    if (showPrices) { setShowPrices(false); return; }
+    setShowPrices(true);
+    setLoadingPrices(true);
+    comparePrices(product.name, product.price)
+      .then((r) => setPrices(r.options))
+      .catch(() => setPrices([]))
+      .finally(() => setLoadingPrices(false));
+  };
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="card w-full max-w-md p-0 overflow-hidden animate-fade-slide-up">
-        {/* Header with score */}
-        <div className="bg-gradient-to-r from-phia-600 to-phia-400 px-5 py-4 flex items-start justify-between">
+      <div className="card w-full max-w-md p-0 overflow-hidden animate-fade-slide-up max-h-[85vh] overflow-y-auto">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-phia-600 to-phia-400 px-5 py-4 flex items-start justify-between sticky top-0 z-10">
           <div className="flex-1 mr-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-white/80 mb-1">
-              Why this gift?
-            </p>
-            <h3 className="font-semibold text-white leading-snug line-clamp-2 text-[15px]">
-              {product.name}
-            </h3>
+            <p className="text-xs font-semibold uppercase tracking-wider text-white/80 mb-1">Why this gift?</p>
+            <h3 className="font-semibold text-white leading-snug line-clamp-2 text-[15px]">{product.name}</h3>
           </div>
           <div className="flex items-center gap-3">
             <ScoreRing score={match_score} size={52} />
-            <button
-              onClick={onClose}
-              className="text-white/80 hover:text-white text-2xl leading-none -mt-1"
-            >
-              ×
-            </button>
+            <button onClick={onClose} className="text-white/80 hover:text-white text-2xl leading-none -mt-1">×</button>
           </div>
         </div>
 
-        {/* Body */}
         <div className="px-5 py-4 flex flex-col gap-3">
-          {/* AI explanation */}
-          <div className="rounded-xl bg-orange-50 border border-orange-100 p-4">
+          <div className="rounded-xl bg-phia-50 border border-phia-100 p-4">
             <p className="text-sm text-gray-700 leading-relaxed">{explanation}</p>
           </div>
 
-          {/* Trust signals */}
           <div className="flex flex-wrap gap-2">
             {product.rating > 0 && (
               <span className="pill bg-amber-50 text-amber-700 border border-amber-200">
@@ -197,29 +197,20 @@ function WhyModal({
               </span>
             )}
             {wilson_score > 0.8 && (
-              <span className="pill bg-green-50 text-green-700 border border-green-200">
-                🏅 High confidence reviews
-              </span>
+              <span className="pill bg-green-50 text-green-700 border border-green-200">🏅 High confidence</span>
             )}
             {product.source && (
-              <span className="pill bg-blue-50 text-blue-700 border border-blue-200">
-                🏪 {product.source}
-              </span>
+              <span className="pill bg-blue-50 text-blue-700 border border-blue-200">🏪 {product.source}</span>
             )}
           </div>
 
           {why_this_store && (
-            <p className="text-xs text-blue-600 bg-blue-50 rounded-lg px-3 py-2">
-              🏪 {why_this_store}
-            </p>
+            <p className="text-xs text-blue-600 bg-blue-50 rounded-lg px-3 py-2">🏪 {why_this_store}</p>
           )}
 
-          {/* Matched interests */}
           {tag_overlap.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">
-                Matched interests
-              </p>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Matched interests</p>
               <div className="flex flex-wrap gap-1.5">
                 {tag_overlap.map((tag) => (
                   <span key={tag} className="pill bg-phia-50 text-phia-700 border border-phia-200 text-[11px]">
@@ -230,23 +221,51 @@ function WhyModal({
             </div>
           )}
 
+          {/* Inline compare prices */}
+          <button
+            onClick={handleCompare}
+            className="text-left text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1.5 py-1"
+          >
+            <span className={`transition-transform duration-200 inline-block text-xs ${showPrices ? "rotate-90" : ""}`}>▶</span>
+            🔍 Compare prices across stores
+          </button>
+
+          {showPrices && (
+            <div className="rounded-xl border border-gray-100 overflow-hidden">
+              {loadingPrices ? (
+                <div className="flex items-center justify-center py-4 gap-2 text-sm text-gray-400">
+                  <div className="loading-dots flex gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-phia-400 block" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-phia-400 block" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-phia-400 block" />
+                  </div>
+                  Searching...
+                </div>
+              ) : prices.length === 0 ? (
+                <p className="text-sm text-gray-400 text-center py-4">No comparisons found</p>
+              ) : (
+                <div className="flex flex-col divide-y divide-gray-50">
+                  {prices.slice(0, 4).map((opt, i) => (
+                    <a key={i} href={opt.url || "#"} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center justify-between px-4 py-2.5 hover:bg-phia-50/30 transition-colors no-underline">
+                      <div>
+                        <span className="text-sm font-bold text-gray-900">${opt.price.toFixed(2)}</span>
+                        {i === 0 && <span className="text-[9px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full ml-2">Best</span>}
+                        <p className="text-xs text-gray-500">{opt.store}</p>
+                      </div>
+                      <span className="text-xs text-phia-600 font-semibold">Visit →</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Buy actions */}
           <div className="flex gap-2 pt-2 border-t border-gray-100">
-            <a
-              href={amazonUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary text-sm py-2.5 flex-1 text-center no-underline"
-            >
+            <a href={amazonUrl} target="_blank" rel="noopener noreferrer"
+              className="btn-primary text-sm py-2.5 flex-1 text-center no-underline">
               🛒 Buy on Amazon
-            </a>
-            <a
-              href={compareUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-shrink-0 rounded-xl border-2 border-gray-200 bg-gray-50 px-3 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition-colors no-underline text-center flex items-center"
-            >
-              🔍 Compare
             </a>
           </div>
         </div>

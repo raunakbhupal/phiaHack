@@ -106,17 +106,17 @@ Rules:
 5. Use budget defaults if not mentioned in description
 6. Never add "books" or "reading" just because someone likes a book-based franchise"""
 
-_SCORE_SYSTEM = """You are a gifting expert who finds deeply personal, thoughtful gifts. Given a recipient profile and candidate products, select the BEST 12 gifts and score them.
+_SCORE_SYSTEM = """You are a gifting expert who finds deeply personal, thoughtful gifts. Given a recipient profile and candidate products, select the BEST 8 gifts and score them.
 
 CRITICAL RULES:
-1. You MUST return EXACTLY 12 results — no fewer.
+1. You MUST return EXACTLY 8 results — no fewer.
 2. DIVERSITY IS MANDATORY: Select gifts across AT LEAST 4 different categories. Never return more than 3 items from the same category.
 3. Cover EVERY major interest of the recipient — if they like cricket AND Harry Potter AND photography, include gifts for ALL three.
 4. Mix price points — include some affordable options and some premium ones within budget.
 5. Prefer products with higher review counts AND higher ratings — a 4.5★ product with 2000 reviews beats a 5★ product with 3 reviews.
 6. Consider the STORE/SOURCE — note if a product comes from a well-known retailer.
 
-Return ONLY a JSON array — no markdown, no preamble. Exactly 12 elements.
+Return ONLY a JSON array — no markdown, no preamble. Exactly 8 elements.
 
 Each element:
 {
@@ -187,6 +187,7 @@ def check_followup(inp: RecipientInput) -> dict:
 def parse_recipient(inp: RecipientInput) -> RecipientProfile:
     user_msg = (
         f"Description: {inp.description}\n"
+        f"Gender: {inp.gender}\n"
         f"Default Budget: ${inp.budget_min:.0f} – ${inp.budget_max:.0f}\n"
         f"Occasion hint: {inp.occasion}"
     )
@@ -242,7 +243,7 @@ def score_and_explain(
     scored = json.loads(raw)
 
     results: list[GiftResult] = []
-    for item in scored[:12]:
+    for item in scored[:8]:
         pid = item["product_id"]
         if pid not in product_map:
             continue
@@ -259,10 +260,10 @@ def score_and_explain(
             )
         )
 
-    # Fallback: fill to 12 from remaining candidates
+    # Fallback: fill to 8 from remaining candidates
     seen_ids = {r.product.id for r in results}
     for product, rel, wilson, matched in candidates:
-        if len(results) >= 12:
+        if len(results) >= 8:
             break
         if product.id not in seen_ids:
             results.append(

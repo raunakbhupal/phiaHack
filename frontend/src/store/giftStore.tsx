@@ -19,6 +19,7 @@ interface GiftState {
   budget_min: number;
   budget_max: number;
   occasion: string;
+  gender: string;
   additional_context: string;
   followup_questions: string[];
   profile: RecipientProfile | null;
@@ -33,6 +34,7 @@ const initialState: GiftState = {
   budget_min: 25,
   budget_max: 100,
   occasion: "birthday",
+  gender: "not specified",
   additional_context: "",
   followup_questions: [],
   profile: null,
@@ -42,7 +44,7 @@ const initialState: GiftState = {
 };
 
 type Action =
-  | { type: "SET_FORM"; description: string; budget_min: number; budget_max: number; occasion: string }
+  | { type: "SET_FORM"; description: string; budget_min: number; budget_max: number; occasion: string; gender: string }
   | { type: "SET_FOLLOWUP"; questions: string[] }
   | { type: "SET_ADDITIONAL_CONTEXT"; context: string }
   | { type: "SET_PARSING" }
@@ -56,7 +58,7 @@ type Action =
 function reducer(state: GiftState, action: Action): GiftState {
   switch (action.type) {
     case "SET_FORM":
-      return { ...state, description: action.description, budget_min: action.budget_min, budget_max: action.budget_max, occasion: action.occasion };
+      return { ...state, description: action.description, budget_min: action.budget_min, budget_max: action.budget_max, occasion: action.occasion, gender: action.gender };
     case "SET_FOLLOWUP":
       return { ...state, phase: "followup", followup_questions: action.questions };
     case "SET_ADDITIONAL_CONTEXT":
@@ -110,20 +112,18 @@ export function useSubmitSearch() {
   const dispatch = useGiftDispatch();
 
   return useCallback(
-    async (description: string, budget_min: number, budget_max: number, occasion: string) => {
-      dispatch({ type: "SET_FORM", description, budget_min, budget_max, occasion });
+    async (description: string, budget_min: number, budget_max: number, occasion: string, gender: string) => {
+      dispatch({ type: "SET_FORM", description, budget_min, budget_max, occasion, gender });
 
       try {
-        // Step 1: Check if we need follow-up questions
-        const followup = await checkFollowUp({ description, budget_min, budget_max, occasion });
+        const followup = await checkFollowUp({ description, budget_min, budget_max, occasion, gender });
 
         if (followup.needs_followup && followup.questions.length > 0) {
           dispatch({ type: "SET_FOLLOWUP", questions: followup.questions });
           return;
         }
 
-        // No follow-up needed — go straight to search
-        await runSearch(dispatch, description, budget_min, budget_max, occasion, "");
+        await runSearch(dispatch, description, budget_min, budget_max, occasion, gender, "");
       } catch (err) {
         dispatch({
           type: "SET_ERROR",
@@ -149,6 +149,7 @@ export function useContinueAfterFollowup() {
           state.budget_min,
           state.budget_max,
           state.occasion,
+          state.gender,
           additionalContext
         );
       } catch (err) {
@@ -172,7 +173,7 @@ export function useRefineSearch() {
       dispatch({ type: "REFINE", budget_min, budget_max, additional_context: newContext });
 
       try {
-        await runSearch(dispatch, state.description, budget_min, budget_max, state.occasion, newContext);
+        await runSearch(dispatch, state.description, budget_min, budget_max, state.occasion, state.gender, newContext);
       } catch (err) {
         dispatch({
           type: "SET_ERROR",
@@ -190,6 +191,7 @@ async function runSearch(
   budget_min: number,
   budget_max: number,
   occasion: string,
+  gender: string,
   additional_context: string
 ) {
   dispatch({ type: "SET_PARSING" });
@@ -204,6 +206,7 @@ async function runSearch(
     budget_max,
     occasion,
     additional_context,
+    gender,
   });
   dispatch({ type: "SET_RESULTS", payload: response });
 }

@@ -10,6 +10,7 @@ class RecipientInput(BaseModel):
     budget_min: float = Field(default=0, ge=0)
     budget_max: float = Field(default=200, ge=0)
     occasion: str = Field(default="general")
+    gender: str = Field(default="not specified")
 
 
 class RecipientProfile(BaseModel):

@@ -3,6 +3,7 @@ export interface RecipientInput {
   budget_min: number;
   budget_max: number;
   occasion: string;
+  gender: string;
 }
 
 export interface RecipientProfile {
@@ -60,6 +61,7 @@ export interface RefineRequest {
   budget_max: number;
   occasion: string;
   additional_context: string;
+  gender: string;
 }
 
 export type AppPhase = "idle" | "followup" | "parsing" | "searching" | "ranking" | "done" | "error";
