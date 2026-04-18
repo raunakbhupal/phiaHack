@@ -10,15 +10,14 @@ export function ResultsPage() {
   const dispatch = useGiftDispatch();
   const refineSearch = useRefineSearch();
 
-  const [filterBudget, setFilterBudget] = useState<number>(
-    profile ? Math.ceil(profile.budget_max * 1.3) : 200
-  );
+  // Budget filter max = user's original max budget
+  const [filterBudget, setFilterBudget] = useState<number>(budget_max);
   const [activeCategory, setActiveCategory] = useState<string>("all");
 
   // Refine panel state
   const [showRefine, setShowRefine] = useState(false);
-  const [refineBudgetMin, setRefineBudgetMin] = useState(budget_min);
-  const [refineBudgetMax, setRefineBudgetMax] = useState(budget_max);
+  const [refineBudgetMin, setRefineBudgetMin] = useState(String(budget_min));
+  const [refineBudgetMax, setRefineBudgetMax] = useState(String(budget_max));
   const [refineDetails, setRefineDetails] = useState("");
 
   const categories = useMemo(() => {
@@ -35,7 +34,7 @@ export function ResultsPage() {
   const handleRefine = (e: React.FormEvent) => {
     e.preventDefault();
     setShowRefine(false);
-    refineSearch(refineBudgetMin, refineBudgetMax, refineDetails);
+    refineSearch(Number(refineBudgetMin) || 0, Number(refineBudgetMax) || 0, refineDetails);
   };
 
   return (
@@ -61,17 +60,17 @@ export function ResultsPage() {
                 : "bg-white text-phia-600 border border-phia-200 hover:bg-phia-50"
             }`}
           >
-            ✏️ Refine
+            🔄 Not quite right? Adjust
           </button>
         </div>
       </header>
 
       {/* Refine panel */}
       {showRefine && (
-        <div className="border-b border-gray-100 bg-white px-4 py-5">
+        <div className="border-b border-gray-100 bg-white px-4 py-5 animate-fade-slide-up">
           <form onSubmit={handleRefine} className="max-w-3xl mx-auto flex flex-col gap-4">
             <p className="text-sm font-semibold text-gray-700">
-              Adjust your search — we'll find new gifts with these changes
+              Tell us what to change — we'll search again with your updates
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
@@ -80,7 +79,7 @@ export function ResultsPage() {
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
                   <input
                     type="number" min={0} value={refineBudgetMin}
-                    onChange={(e) => setRefineBudgetMin(Number(e.target.value))}
+                    onChange={(e) => setRefineBudgetMin(e.target.value)}
                     className="w-full pl-7 pr-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-phia-400"
                   />
                 </div>
@@ -91,7 +90,7 @@ export function ResultsPage() {
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
                   <input
                     type="number" min={0} value={refineBudgetMax}
-                    onChange={(e) => setRefineBudgetMax(Number(e.target.value))}
+                    onChange={(e) => setRefineBudgetMax(e.target.value)}
                     className="w-full pl-7 pr-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-phia-400"
                   />
                 </div>
@@ -108,7 +107,7 @@ export function ResultsPage() {
             </div>
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                Anything else to add?
+                Forgot something? Add more details
               </label>
               <input
                 type="text"
@@ -120,7 +119,7 @@ export function ResultsPage() {
             </div>
             <div className="flex gap-3">
               <button type="submit" className="btn-primary text-sm py-2.5 px-6">
-                🔄 Re-search with changes
+                🔍 Search Again
               </button>
               <button type="button" onClick={() => setShowRefine(false)} className="btn-ghost text-sm">
                 Cancel
@@ -139,7 +138,7 @@ export function ResultsPage() {
               <div className="card px-4 py-4">
                 <BudgetSlider
                   initial={filterBudget}
-                  max={Math.max(filterBudget, 500)}
+                  max={budget_max}
                   onChange={setFilterBudget}
                 />
               </div>
