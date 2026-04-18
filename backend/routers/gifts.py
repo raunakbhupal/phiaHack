@@ -98,6 +98,71 @@ def find_gifts(body: RefineRequest) -> FindGiftsResponse:
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class CompareRequest(BaseModel):
+    product_name: str
+    price: float = 0
+
+
+class PriceOption(BaseModel):
+    store: str
+    price: float
+    rating: float = 0
+    review_count: int = 0
+    url: str
+    thumbnail: str = ""
+
+
+class CompareResponse(BaseModel):
+    product_name: str
+    options: List[PriceOption]
+
+
+@router.post("/compare-prices", response_model=CompareResponse)
+def compare_prices(body: CompareRequest) -> CompareResponse:
+    try:
+        import os, requests as req
+        key = os.environ.get("SERPAPI_KEY", "")
+        if not key:
+            return CompareResponse(product_name=body.product_name, options=[])
+
+        params = {
+            "q": body.product_name,
+            "tbm": "shop",
+            "api_key": key,
+            "num": 8,
+            "gl": "us",
+            "hl": "en",
+        }
+        r = req.get("https://serpapi.com/search", params=params, timeout=10)
+        r.raise_for_status()
+        items = r.json().get("shopping_results", [])
+
+        options = []
+        seen: set[str] = set()
+        for item in items:
+            store = item.get("source", "")
+            price = float(item.get("extracted_price") or 0)
+            if not store or not price:
+                continue
+            store_key = store.lower().strip()
+            if store_key in seen:
+                continue
+            seen.add(store_key)
+            options.append(PriceOption(
+                store=store,
+                price=price,
+                rating=float(item.get("rating") or 0),
+                review_count=int(item.get("reviews") or 0),
+                url=item.get("product_link") or "",
+                thumbnail=item.get("thumbnail") or "",
+            ))
+
+        options.sort(key=lambda o: o.price)
+        return CompareResponse(product_name=body.product_name, options=options[:6])
+    except Exception:
+        return CompareResponse(product_name=body.product_name, options=[])
+
+
 @router.post("/gift-message", response_model=GiftMessageResponse)
 def gift_message(body: GiftMessageRequest) -> GiftMessageResponse:
     try:

@@ -1,5 +1,6 @@
-import { useState } from "react";
-import type { GiftResult, RecipientProfile } from "../types";
+import { useEffect, useState } from "react";
+import type { GiftResult, PriceOption, RecipientProfile } from "../types";
+import { comparePrices } from "../api/client";
 import { ScoreRing } from "./ScoreRing";
 
 const CATEGORY_GRADIENT: Record<string, string> = {
@@ -53,6 +54,94 @@ function buildAmazonUrl(name: string, price: number): string {
 
 function buildGoogleShoppingUrl(name: string): string {
   return `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(name)}`;
+}
+
+function CompareModal({
+  productName,
+  price,
+  onClose,
+}: {
+  productName: string;
+  price: number;
+  onClose: () => void;
+}) {
+  const [options, setOptions] = useState<PriceOption[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    comparePrices(productName, price)
+      .then((r) => setOptions(r.options))
+      .catch(() => setOptions([]))
+      .finally(() => setLoading(false));
+  }, [productName, price]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="card w-full max-w-md p-0 overflow-hidden animate-fade-slide-up">
+        <div className="bg-gradient-to-r from-gray-800 to-gray-900 px-5 py-4 flex items-center justify-between">
+          <div className="flex-1 mr-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Compare Prices</p>
+            <h3 className="font-semibold text-white leading-snug line-clamp-1 text-sm">{productName}</h3>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl leading-none">×</button>
+        </div>
+
+        <div className="px-5 py-4">
+          {loading ? (
+            <div className="flex items-center justify-center py-8 gap-2 text-sm text-gray-400">
+              <div className="loading-dots flex gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-phia-400 block" />
+                <span className="h-1.5 w-1.5 rounded-full bg-phia-400 block" />
+                <span className="h-1.5 w-1.5 rounded-full bg-phia-400 block" />
+              </div>
+              Searching stores...
+            </div>
+          ) : options.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500 text-sm">No price comparisons found.</p>
+              <a
+                href={buildGoogleShoppingUrl(productName)}
+                target="_blank" rel="noopener noreferrer"
+                className="text-phia-600 text-sm font-semibold mt-2 inline-block hover:underline"
+              >
+                Search Google Shopping →
+              </a>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {options.map((opt, i) => (
+                <a
+                  key={i}
+                  href={opt.url || buildGoogleShoppingUrl(productName)}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-3 rounded-xl border border-gray-100 hover:border-phia-200 hover:bg-phia-50/30 px-4 py-3 transition-all no-underline group"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-gray-900 text-lg">${opt.price.toFixed(2)}</span>
+                      {i === 0 && <span className="text-[10px] font-bold uppercase tracking-wider text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Best Price</span>}
+                    </div>
+                    <p className="text-sm text-gray-600 font-medium truncate">{opt.store}</p>
+                    {opt.rating > 0 && (
+                      <p className="text-xs text-gray-400">
+                        ⭐ {opt.rating.toFixed(1)} · {opt.review_count > 0 ? `${opt.review_count} reviews` : ""}
+                      </p>
+                    )}
+                  </div>
+                  <span className="text-xs font-semibold text-phia-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                    Visit →
+                  </span>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function WhyModal({
@@ -177,12 +266,12 @@ export function GiftCard({
   style?: React.CSSProperties;
 }) {
   const [showWhy, setShowWhy] = useState(false);
+  const [showCompare, setShowCompare] = useState(false);
   const { product, match_score, wilson_score } = result;
 
   const gradient = CATEGORY_GRADIENT[product.category] ?? "from-phia-400 to-phia-600";
   const emoji = CATEGORY_EMOJI[product.category] ?? "🎁";
   const amazonUrl = buildAmazonUrl(product.name, product.price);
-  const compareUrl = product.affiliate_url || buildGoogleShoppingUrl(product.name);
 
   return (
     <>
@@ -277,14 +366,12 @@ export function GiftCard({
               🛒  Buy on Amazon
             </a>
             <div className="flex gap-2">
-              <a
-                href={compareUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 rounded-full border border-gray-200 bg-white py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors no-underline text-center"
+              <button
+                onClick={() => setShowCompare(true)}
+                className="flex-1 rounded-full border border-gray-200 bg-white py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
               >
                 🔍 Compare Prices
-              </a>
+              </button>
               <button
                 onClick={() => setShowWhy(true)}
                 className="flex-1 rounded-full border border-phia-200 bg-phia-50 py-2 text-xs font-semibold text-phia-700 hover:bg-phia-100 transition-colors"
@@ -297,6 +384,7 @@ export function GiftCard({
       </div>
 
       {showWhy && <WhyModal result={result} onClose={() => setShowWhy(false)} />}
+      {showCompare && <CompareModal productName={product.name} price={product.price} onClose={() => setShowCompare(false)} />}
     </>
   );
 }

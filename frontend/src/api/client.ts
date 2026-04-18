@@ -1,4 +1,5 @@
 import type {
+  CompareResponse,
   FindGiftsResponse,
   FollowUpResponse,
   GiftMessageRequest,
@@ -33,6 +34,10 @@ export function parseRecipient(input: RecipientInput): Promise<RecipientProfile>
 
 export function findGifts(input: RefineRequest): Promise<FindGiftsResponse> {
   return post<FindGiftsResponse>("/api/find-gifts", input);
+}
+
+export function comparePrices(productName: string, price: number): Promise<CompareResponse> {
+  return post<CompareResponse>("/api/compare-prices", { product_name: productName, price });
 }
 
 export function generateGiftMessage(req: GiftMessageRequest): Promise<GiftMessageResponse> {

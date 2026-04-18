@@ -74,6 +74,20 @@ export interface GiftMessageResponse {
   message: string;
 }
 
+export interface PriceOption {
+  store: string;
+  price: number;
+  rating: number;
+  review_count: number;
+  url: string;
+  thumbnail: string;
+}
+
+export interface CompareResponse {
+  product_name: string;
+  options: PriceOption[];
+}
+
 export const OCCASIONS = [
   { value: "birthday", label: "🎂 Birthday" },
   { value: "anniversary", label: "💝 Anniversary" },
