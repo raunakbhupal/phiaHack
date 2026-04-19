@@ -58,7 +58,7 @@ export function ResultsPage({ onShowWishlist }: { onShowWishlist: () => void }) 
             onClick={onShowWishlist}
             className="text-sm font-semibold px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-600 hover:bg-phia-50 hover:border-phia-200 hover:text-phia-600 transition-colors flex items-center gap-1.5"
           >
-            ♥{count > 0 && <span className="bg-phia-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">{count}</span>}
+            ♥ Wishlist{count > 0 && <span className="bg-phia-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">{count}</span>}
           </button>
           <button
             onClick={() => setShowRefine(!showRefine)}
