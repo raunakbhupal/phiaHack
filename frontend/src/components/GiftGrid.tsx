@@ -1,5 +1,6 @@
 import type { GiftResult, RecipientProfile } from "../types";
 import { GiftCard } from "./GiftCard";
+import { GiftListItem } from "./GiftListItem";
 
 export function GiftGrid({
   results,
@@ -20,12 +21,18 @@ export function GiftGrid({
     );
   }
 
+  if (layout === "list") {
+    return (
+      <div className="flex flex-col gap-3">
+        {results.map((result, i) => (
+          <GiftListItem key={result.product.id} result={result} rank={i + 1} />
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className={
-      layout === "list"
-        ? "flex flex-col gap-5"
-        : "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5"
-    }>
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
       {results.map((result, i) => (
         <GiftCard
           key={result.product.id}
