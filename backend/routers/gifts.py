@@ -119,12 +119,10 @@ class CompareResponse(BaseModel):
     options: List[PriceOption]
 
 
-def _store_search_url(store: str, product_name: str) -> str:
-    """Build a direct search URL for known stores using simplified product name."""
+def _store_search_url(store: str, product_name: str, google_product_link: str = "") -> str:
+    """Build a direct search URL for known stores, or use Google product page."""
     import urllib.parse
-    # Simplify product name: take first 4-5 meaningful words for better store search results
     words = product_name.replace("/", " ").replace("-", " ").split()
-    # Remove common filler words
     skip = {"the", "a", "an", "for", "and", "with", "in", "of", "by", "to", "from", "set", "kit", "pack", "new"}
     clean = [w for w in words if w.lower() not in skip][:5]
     q = urllib.parse.quote_plus(" ".join(clean))
@@ -154,8 +152,11 @@ def _store_search_url(store: str, product_name: str) -> str:
         return f"https://poshmark.com/search?query={q}"
     if "wayfair" in s:
         return f"https://www.wayfair.com/keyword.php?keyword={q}"
-    # Fallback: Google Shopping with store name
-    return f"https://www.google.com/search?tbm=shop&q={q}+{urllib.parse.quote_plus(store)}"
+    # For unknown stores: use Google Shopping product page if available
+    # (shows the actual product with all buying options)
+    if google_product_link:
+        return google_product_link
+    return f"https://www.google.com/search?tbm=shop&q={q}"
 
 
 @router.post("/compare-prices", response_model=CompareResponse)
@@ -194,7 +195,7 @@ def compare_prices(body: CompareRequest) -> CompareResponse:
                 price=price,
                 rating=float(item.get("rating") or 0),
                 review_count=int(item.get("reviews") or 0),
-                url=_store_search_url(store, body.product_name),
+                url=_store_search_url(store, body.product_name, item.get("product_link", "")),
                 thumbnail=item.get("thumbnail") or "",
             ))
 
