@@ -1,15 +1,12 @@
 import type { GiftResult, RecipientProfile } from "../types";
 import { GiftCard } from "./GiftCard";
-import { GiftListItem } from "./GiftListItem";
 
 export function GiftGrid({
   results,
   profile,
-  layout = "grid",
 }: {
   results: GiftResult[];
   profile: RecipientProfile;
-  layout?: "grid" | "list";
 }) {
   if (results.length === 0) {
     return (
@@ -17,16 +14,6 @@ export function GiftGrid({
         <span className="text-5xl block mb-4">🎁</span>
         <p className="text-gray-700 font-semibold text-lg">No gifts match this filter.</p>
         <p className="text-sm text-gray-400 mt-1">Try adjusting the budget or category above.</p>
-      </div>
-    );
-  }
-
-  if (layout === "list") {
-    return (
-      <div className="flex flex-col gap-3">
-        {results.map((result, i) => (
-          <GiftListItem key={result.product.id} result={result} rank={i + 1} />
-        ))}
       </div>
     );
   }
