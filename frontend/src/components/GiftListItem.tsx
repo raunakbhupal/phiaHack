@@ -127,7 +127,7 @@ export function GiftListItem({ result, rank }: { result: GiftResult; rank: numbe
             </a>
             <button onClick={() => setShowCompare(!showCompare)}
               className="rounded-full border border-gray-200 bg-white text-xs font-semibold text-gray-600 px-3 py-1.5 hover:bg-gray-50 transition-colors">
-              🔍 Compare
+              🔍 Compare Prices
             </button>
             <button onClick={() => setShowWhy(!showWhy)}
               className="rounded-full border border-phia-200 bg-phia-50 text-xs font-semibold text-phia-700 px-3 py-1.5 hover:bg-phia-100 transition-colors">
