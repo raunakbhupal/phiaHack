@@ -20,7 +20,7 @@ export function SearchPage({ onShowWishlist }: { onShowWishlist: () => void }) {
           <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-phia-500 to-phia-700 flex items-center justify-center text-white text-sm font-bold shadow-sm">
             ✦
           </div>
-          <span className="font-display text-xl text-gray-900">phia gifts</span>
+          <span className="font-display text-xl text-gray-900">Phia Gifting</span>
         </div>
         <div className="hidden sm:flex items-center gap-3 text-xs text-gray-400 font-medium">
           <button onClick={onShowWishlist} className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 hover:bg-phia-50 hover:border-phia-200 hover:text-phia-600 transition-colors">
@@ -104,7 +104,7 @@ export function SearchPage({ onShowWishlist }: { onShowWishlist: () => void }) {
       </main>
 
       <footer className="py-4 text-center text-xs text-gray-300">
-        Built for Phia Hackathon · AI-Powered Gift Discovery
+        Phia Gifting · AI-Powered Gift Discovery
       </footer>
     </div>
   );

@@ -17,7 +17,7 @@ export function WishlistPage({ onBack }: { onBack: () => void }) {
         <button onClick={onBack} className="btn-ghost">← Back</button>
         <div className="flex items-center gap-2">
           <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-phia-500 to-phia-700 flex items-center justify-center text-white text-[10px] font-bold">✦</div>
-          <span className="font-display font-semibold text-gray-900">Wishlist</span>
+          <span className="font-display font-semibold text-gray-900">Phia Gifting</span>
         </div>
         {count > 0 && (
           <button onClick={clear} className="text-xs text-red-400 hover:text-red-600 font-medium">
