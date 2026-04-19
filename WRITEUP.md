@@ -1,16 +1,12 @@
 # Phia Gifting — AI-Powered Gift Discovery
 
-## Inspiration
+## Why this problem?
 
 A few weeks back I spent hours trying to find a birthday gift for a friend who's into yoga and loves Lululemon. Every site I tried just showed me generic yoga mats or the same Lululemon gift card. None of them understood that she's a specific person with specific taste. I ended up buying a gift card — and it felt lazy, like I hadn't put any thought into it.
 
-But this isn't just my problem. Everyone faces it. We've all been there — scrolling endlessly, giving up, and defaulting to a gift card because nothing feels right. Gift cards say "I couldn't figure out what you'd like." A great gift says "I know you." That gap is what Phia Gifting solves.
+But this isn't just my problem. Everyone faces it. We've all been there — scrolling endlessly, giving up, and defaulting to a gift card because nothing feels right. Gift cards say "I couldn't figure out what you'd like." A great gift says "I know you."
 
-## Why this problem?
-
-Every recommendation system today optimizes for the shopper's own preferences. But gift-giving is fundamentally different — you're trying to understand someone else's personality, interests, and tastes. Try searching "romantic but not too romantic birthday gift for a friend who likes art and coffee" on any shopping site. You'll get generic listicles, not personalized results.
-
-Phia already solves the "find the best deal" problem brilliantly. We wanted to solve the step before that: **figuring out what to buy in the first place.**
+The core issue: every recommendation system today optimizes for the shopper's own preferences. But gift-giving is fundamentally different — you're trying to understand someone else's personality, interests, and tastes. Phia already solves the "find the best deal" problem brilliantly. We wanted to solve the step before that: **figuring out what to buy in the first place.**
 
 ## The Solution
 
