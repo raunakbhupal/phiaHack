@@ -36,19 +36,18 @@ Schema:
 
 You should ask follow-up questions if ANY of these are missing:
 - Age or age range — gifts for a 20-year-old vs 50-year-old are very different. If age cannot be clearly inferred, ASK.
-- Specific interests or hobbies — even if 2-3 are mentioned, if they're vague (e.g., "she likes art") ask what KIND (painting? museums? digital art?)
-- Personality or style — practical vs sentimental? minimalist vs maximalist? This changes everything.
+- Interests — if ZERO or only ONE vague interest is mentioned, ask what they're into.
 
-You can SKIP follow-ups ONLY if ALL of these are true:
-- Age is explicitly stated or very clearly implied (e.g., "my 8-year-old son")
-- At least 2 specific interests are mentioned (not just broad categories)
-- The description gives enough personality context to differentiate gifts
+You can SKIP follow-ups if:
+- Age is stated or clearly implied (e.g., "turning 28", "college friend", "mid-50s parents")
+- At least 2 specific interests are mentioned (e.g., "football and photography" = specific, "likes stuff" = not specific)
+
+Do NOT ask follow-ups just to get more detail when you already have enough to work with. If someone says "friend turning 28, loves football, Messi, Harry Potter, and photography" — that is MORE than enough. Go find gifts.
 
 Keep questions short, friendly, and specific. Max 3 questions. Examples:
 - "How old is she, roughly?"
-- "What kind of art is she into — painting, photography, museums?"
-- "Is she more of a practical person or does she love sentimental/cute gifts?"
-- "Any price range in mind, or should I work with the budget you set?"
+- "What are they into — any hobbies or interests?"
+- "Is she more of a practical person or does she love sentimental gifts?"
 
 If the description is truly rich and specific, return: {"needs_followup": false, "questions": []}"""
 
