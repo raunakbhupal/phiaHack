@@ -60,7 +60,7 @@ export function RecipientForm() {
       </div>
 
       {/* Budget + Occasion + Gender */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-[1fr_1fr_1.3fr_1fr] gap-4">
         <div>
           <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Min Budget</label>
           <div className="relative">

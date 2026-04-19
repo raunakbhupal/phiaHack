@@ -38,7 +38,7 @@ export function CustomSelect({
           type="button"
           onClick={() => setOpen(!open)}
           className="w-full flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm text-gray-900
-            focus:outline-none focus:ring-2 focus:ring-phia-300 focus:border-transparent focus:bg-white transition-all text-left"
+            focus:outline-none focus:ring-2 focus:ring-phia-300 focus:border-transparent focus:bg-white transition-all text-left min-h-[42px]"
         >
           <span>{selected?.label ?? "Select..."}</span>
           <span className={`text-gray-400 text-xs transition-transform ${open ? "rotate-180" : ""}`}>▼</span>

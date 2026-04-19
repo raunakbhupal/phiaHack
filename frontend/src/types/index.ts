@@ -95,7 +95,7 @@ export const OCCASIONS = [
   { value: "anniversary", label: "💝 Anniversary" },
   { value: "holiday", label: "🎄 Holiday" },
   { value: "graduation", label: "🎓 Graduation" },
-  { value: "valentines", label: "💘 Valentine's" },
+  { value: "valentines", label: "💘 Valentine's Day" },
   { value: "date-night", label: "🌹 Date Night" },
   { value: "wedding", label: "💍 Wedding" },
   { value: "housewarming", label: "🏠 Housewarming" },
