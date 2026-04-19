@@ -93,9 +93,9 @@ export function RecipientForm() {
               focus:outline-none focus:ring-2 focus:ring-phia-300 focus:border-transparent focus:bg-white transition-all"
           >
             <option value="not specified">Any</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="non-binary">Non-binary</option>
+            <option value="male">👨 Male</option>
+            <option value="female">👩 Female</option>
+            <option value="non-binary">🧑 Non-binary</option>
           </select>
         </div>
       </div>

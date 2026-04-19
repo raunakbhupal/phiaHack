@@ -106,15 +106,30 @@ Rules:
 5. Use budget defaults if not mentioned in description
 6. Never add "books" or "reading" just because someone likes a book-based franchise"""
 
-_SCORE_SYSTEM = """You are a gifting expert who finds deeply personal, thoughtful gifts. Given a recipient profile and candidate products, select the BEST 8 gifts and score them.
+_SCORE_SYSTEM = """You are an elite gifting expert. Given a recipient profile and candidate products, select the BEST 8 gifts and score them.
 
-CRITICAL RULES:
-1. You MUST return EXACTLY 8 results — no fewer.
-2. DIVERSITY IS MANDATORY: Select gifts across AT LEAST 4 different categories. Never return more than 3 items from the same category.
-3. Cover EVERY major interest of the recipient — if they like cricket AND Harry Potter AND photography, include gifts for ALL three.
-4. Mix price points — include some affordable options and some premium ones within budget.
-5. Prefer products with higher review counts AND higher ratings — a 4.5★ product with 2000 reviews beats a 5★ product with 3 reviews.
-6. Consider the STORE/SOURCE — note if a product comes from a well-known retailer.
+THINK STEP BY STEP before selecting:
+1. What are this person's CORE passions? (not just surface interests)
+2. What would make them say "wow, they really know me"?
+3. Would this gift collect dust or get used regularly?
+4. Is this a lazy/generic gift or something thoughtful?
+
+SELECTION RULES:
+1. Return EXACTLY 8 results — no fewer.
+2. DIVERSITY: Select from AT LEAST 3 different categories. Max 3 from same category.
+3. Cover the recipient's TOP interests — if they like cricket AND Harry Potter AND photography, include gifts for ALL three.
+4. REJECT generic gifts — "gift card", "generic mug", plain t-shirts are lazy. Pick items that show you UNDERSTAND the person.
+5. PREFER products with high review counts — a 4.5★ with 2000 reviews beats 5★ with 3 reviews.
+6. MIX price points within the budget range.
+7. Consider GENDER if specified — don't suggest women's jewelry for a male recipient or vice versa.
+8. Think about OCCASION — birthday gifts should feel celebratory, holiday gifts can be cozy/festive.
+
+GIFT QUALITY HIERARCHY (prefer higher):
+- Tier 1: Directly enables their hobby/passion (e.g., camera lens for photographer)
+- Tier 2: Celebrates their fandom in a unique way (e.g., custom art, not just a logo t-shirt)
+- Tier 3: Combines two interests creatively (e.g., Harry Potter camera strap)
+- Tier 4: High-quality everyday item related to their lifestyle
+- Tier 5: Generic but well-reviewed gift in their interest area
 
 Return ONLY a JSON array — no markdown, no preamble. Exactly 8 elements.
 
@@ -127,22 +142,19 @@ Each element:
 }
 
 Scoring:
-- 90-99: Directly targets a core interest + perfect occasion fit + great reviews
-- 80-89: Strong match on 2+ interests, good reviews
-- 70-79: Solid match on one interest with good quality signals
-- 60-69: Tangential but thoughtful connection
-- 50-59: Acceptable filler
+- 90-99: Tier 1-2 gift + perfect occasion fit + excellent reviews
+- 80-89: Tier 2-3 gift, strong match on 2+ interests
+- 70-79: Tier 3-4 gift, solid single-interest match
+- 60-69: Tier 4-5, acceptable but not exciting
+- 50-59: Filler only if nothing better available
 
 Explanation rules:
-- 2-3 sentences, MUST reference specific interests or traits from the profile
-- Explain WHY this gift connects to THEM personally — not generic praise
-- If the product has strong reviews, mention it as a trust signal
-- Be warm and specific
+- 2-3 sentences that feel like a thoughtful friend explaining the gift
+- MUST reference specific interests or traits — never be generic
+- Mention what makes this gift SPECIAL, not just what it is
+- If strong reviews, mention as a trust signal
 
-why_this_store rules:
-- If the source is a well-known store (Amazon, Etsy, Target, etc.), note it briefly
-- e.g. "Top-rated on Amazon with verified reviews" or "Handcrafted seller on Etsy"
-- null if source is unknown"""
+why_this_store: Brief note if from a well-known retailer, null otherwise."""
 
 _QUERY_SYSTEM = """You generate targeted Google Shopping search queries to find ideal gifts.
 
@@ -187,7 +199,7 @@ def check_followup(inp: RecipientInput) -> dict:
 def parse_recipient(inp: RecipientInput) -> RecipientProfile:
     user_msg = (
         f"Description: {inp.description}\n"
-        f"Gender: {inp.gender}\n"
+        f"Gender: {inp.gender} (use this to tailor gift suggestions appropriately)\n"
         f"Default Budget: ${inp.budget_min:.0f} – ${inp.budget_max:.0f}\n"
         f"Occasion hint: {inp.occasion}"
     )
@@ -243,8 +255,10 @@ def score_and_explain(
     scored = json.loads(raw)
 
     results: list[GiftResult] = []
-    for item in scored[:8]:
-        pid = item["product_id"]
+    for item in scored:
+        if len(results) >= 8:
+            break
+        pid = item.get("product_id", "")
         if pid not in product_map:
             continue
         product, rel, wilson, matched = product_map[pid]
