@@ -34,24 +34,23 @@ Schema:
   "questions": [string] (1-3 short questions, only if needs_followup is true)
 }
 
-Ask follow-up questions ONLY if the description is missing critical details that would significantly change the gift recommendations. You should ask if:
-- Age/age range is completely unclear AND would matter (e.g., gifts for a 10-year-old vs 40-year-old are very different)
-- No interests or hobbies are mentioned at all
-- The occasion is ambiguous and could change the gift type significantly
-- Budget expectations are unclear AND the description hints at either very cheap or very expensive taste
+You should ask follow-up questions if ANY of these are missing:
+- Age or age range — gifts for a 20-year-old vs 50-year-old are very different. If age cannot be clearly inferred, ASK.
+- Specific interests or hobbies — even if 2-3 are mentioned, if they're vague (e.g., "she likes art") ask what KIND (painting? museums? digital art?)
+- Personality or style — practical vs sentimental? minimalist vs maximalist? This changes everything.
 
-DO NOT ask follow-ups if:
-- The description already has 2+ clear interests/hobbies
-- Age can be reasonably inferred (e.g., "my college friend" → ~20s)
-- The occasion is already specified in the form
-- You're just being overly thorough — bias toward ACTION over questions
+You can SKIP follow-ups ONLY if ALL of these are true:
+- Age is explicitly stated or very clearly implied (e.g., "my 8-year-old son")
+- At least 2 specific interests are mentioned (not just broad categories)
+- The description gives enough personality context to differentiate gifts
 
 Keep questions short, friendly, and specific. Max 3 questions. Examples:
-- "How old is Jake? Gift ideas vary a lot by age."
-- "Any hobbies or things they're into lately?"
-- "Is this for a milestone birthday or just a casual gift?"
+- "How old is she, roughly?"
+- "What kind of art is she into — painting, photography, museums?"
+- "Is she more of a practical person or does she love sentimental/cute gifts?"
+- "Any price range in mind, or should I work with the budget you set?"
 
-If the description is rich enough, return: {"needs_followup": false, "questions": []}"""
+If the description is truly rich and specific, return: {"needs_followup": false, "questions": []}"""
 
 _PARSE_SYSTEM = """You are a gifting intelligence assistant. Parse a natural language description of a gift recipient into a structured JSON profile used to match products.
 
