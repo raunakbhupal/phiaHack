@@ -102,7 +102,21 @@ function reducer(state: GiftState, action: Action): GiftState {
         additional_context: action.additional_context ?? state.additional_context,
       };
     case "RESET":
-      return { ...initialState };
+      sessionStorage.removeItem(SESSION_KEY);
+      return {
+        phase: "idle" as AppPhase,
+        description: "",
+        budget_min: 25,
+        budget_max: 100,
+        occasion: "birthday",
+        gender: "not specified",
+        additional_context: "",
+        followup_questions: [],
+        profile: null,
+        results: [],
+        total_candidates: 0,
+        error: null,
+      };
     default:
       return state;
   }
