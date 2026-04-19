@@ -1,5 +1,9 @@
 # Phia Gifting — AI-Powered Gift Discovery
 
+## Inspiration
+
+Last week I spent hours trying to find a birthday gift for a friend who's into yoga and loves Lululemon. Every site I tried just showed me generic yoga mats or the same Lululemon gift card. None of them understood that she's a specific person with specific taste — they just matched keywords. That's when it hit me: recommendation systems today are built for the shopper, not for gift-giving. And gift-giving is a fundamentally different problem.
+
 ## Why this problem?
 
 Every recommendation system today optimizes for the shopper's own preferences. But gift-giving is fundamentally different — you're trying to understand someone else's personality, interests, and tastes. Try searching "romantic but not too romantic birthday gift for a friend who likes art and coffee" on any shopping site. You'll get generic listicles, not personalized results.
