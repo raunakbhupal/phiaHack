@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { GiftResult, PriceOption, RecipientProfile } from "../types";
 import { comparePrices } from "../api/client";
 import { ScoreRing } from "./ScoreRing";
+import { useWishlist } from "../store/wishlist";
 
 const CATEGORY_GRADIENT: Record<string, string> = {
   "Outdoors & Adventure":   "from-emerald-400 to-teal-600",
@@ -286,6 +287,8 @@ export function GiftCard({
 }) {
   const [showWhy, setShowWhy] = useState(false);
   const [showCompare, setShowCompare] = useState(false);
+  const { toggle, isWishlisted } = useWishlist();
+  const wishlisted = isWishlisted(result.product.id);
   const { product, match_score, wilson_score } = result;
 
   const gradient = CATEGORY_GRADIENT[product.category] ?? "from-phia-400 to-phia-600";
@@ -335,7 +338,15 @@ export function GiftCard({
             </div>
           )}
 
-          <div className="absolute top-2 right-3 z-10">
+          <div className="absolute top-2 right-3 z-10 flex items-start gap-1.5">
+            <button
+              onClick={(e) => { e.stopPropagation(); toggle(result); }}
+              className={`h-8 w-8 rounded-full flex items-center justify-center transition-all shadow-md text-sm ${
+                wishlisted ? "bg-red-500 text-white scale-110" : "bg-white/90 text-gray-400 hover:text-red-400"
+              }`}
+            >
+              {wishlisted ? "♥" : "♡"}
+            </button>
             <ScoreRing score={match_score} size={62} />
           </div>
 

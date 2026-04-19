@@ -1,14 +1,16 @@
 import { useMemo, useState } from "react";
 import { useGiftDispatch, useGiftState, useRefineSearch } from "../store/giftStore";
+import { useWishlist } from "../store/wishlist";
 import { RecipientCard } from "../components/RecipientCard";
 import { GiftGrid } from "../components/GiftGrid";
 import { BudgetSlider } from "../components/BudgetSlider";
 import { OCCASIONS } from "../types";
 
-export function ResultsPage() {
+export function ResultsPage({ onShowWishlist }: { onShowWishlist: () => void }) {
   const { profile, results, total_candidates, budget_min, budget_max, occasion } = useGiftState();
   const dispatch = useGiftDispatch();
   const refineSearch = useRefineSearch();
+  const { count } = useWishlist();
 
   // Budget filter max = user's original max budget
   const [filterBudget, setFilterBudget] = useState<number>(budget_max);
@@ -52,6 +54,12 @@ export function ResultsPage() {
           <span className="text-sm text-gray-500 hidden sm:block">
             {total_candidates} products scanned
           </span>
+          <button
+            onClick={onShowWishlist}
+            className="text-sm font-semibold px-3 py-1.5 rounded-full border border-gray-200 bg-white text-gray-600 hover:bg-phia-50 hover:border-phia-200 hover:text-phia-600 transition-colors flex items-center gap-1.5"
+          >
+            ♥{count > 0 && <span className="bg-phia-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">{count}</span>}
+          </button>
           <button
             onClick={() => setShowRefine(!showRefine)}
             className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-colors ${

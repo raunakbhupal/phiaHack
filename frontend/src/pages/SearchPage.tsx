@@ -1,4 +1,5 @@
 import { useGiftState } from "../store/giftStore";
+import { useWishlist } from "../store/wishlist";
 import { RecipientForm } from "../components/RecipientForm";
 
 const EXAMPLES = [
@@ -7,8 +8,9 @@ const EXAMPLES = [
   "Looking for a gift for my dad who's a football fanatic and Messi admirer. He also loves cooking on weekends.",
 ];
 
-export function SearchPage() {
+export function SearchPage({ onShowWishlist }: { onShowWishlist: () => void }) {
   const { error } = useGiftState();
+  const { count } = useWishlist();
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -20,9 +22,14 @@ export function SearchPage() {
           </div>
           <span className="font-display text-xl text-gray-900">phia gifts</span>
         </div>
-        <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400 font-medium">
-          <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block" />
-          Powered by Claude AI
+        <div className="hidden sm:flex items-center gap-3 text-xs text-gray-400 font-medium">
+          <button onClick={onShowWishlist} className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 hover:bg-phia-50 hover:border-phia-200 hover:text-phia-600 transition-colors">
+            ♥ Wishlist{count > 0 && <span className="bg-phia-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">{count}</span>}
+          </button>
+          <span className="flex items-center gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block" />
+            Powered by Claude AI
+          </span>
         </div>
       </header>
 
