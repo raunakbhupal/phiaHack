@@ -197,7 +197,7 @@ function WhyModal({
                 ⭐ {product.rating.toFixed(1)} · {formatReviewCount(product.review_count)} reviews
               </span>
             )}
-            {wilson_score > 0.8 && (
+            {wilson_score > 0.9 && (
               <span className="pill bg-green-50 text-green-700 border border-green-200">🏅 High confidence</span>
             )}
             {product.source && (
@@ -355,7 +355,7 @@ export function GiftCard({
               {product.category}
             </span>
             <div className="flex gap-1.5">
-              {wilson_score > 0.8 && (
+              {wilson_score > 0.9 && (
                 <span className="text-[10px] font-semibold text-white bg-green-500/80 backdrop-blur-sm rounded-full px-2 py-0.5">
                   🏅 Trusted
                 </span>
