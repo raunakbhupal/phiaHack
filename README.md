@@ -4,6 +4,8 @@
 
 🔗 **[Try it live → phia-gifts-ui.onrender.com](https://phia-gifts-ui.onrender.com/)**
 
+> ⏳ **Note:** The backend runs on Render's free tier, which spins down with inactivity. Your first request may take ~50 seconds to cold start. After that, it's fast.
+
 Built for the [Phia](https://phia.com/) Hackathon.
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-59%25-blue)
