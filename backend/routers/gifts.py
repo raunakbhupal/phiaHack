@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import List, Optional
 from pydantic import BaseModel
 
@@ -43,9 +44,9 @@ def check_followup(body: RecipientInput) -> FollowUpResponse:
         result = claude_service.check_followup(body)
         return FollowUpResponse(**result)
     except anthropic.APIError as e:
-        raise HTTPException(status_code=503, detail="AI service temporarily unavailable. Please try again.")
+        logging.exception("API error"); raise HTTPException(status_code=503, detail="AI service temporarily unavailable. Please try again.")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Something went wrong. Please try again.")
+        logging.exception("Unexpected error"); raise HTTPException(status_code=500, detail="Something went wrong. Please try again.")
 
 
 @router.post("/parse-recipient", response_model=RecipientProfile)
@@ -53,9 +54,9 @@ def parse_recipient(body: RecipientInput) -> RecipientProfile:
     try:
         return claude_service.parse_recipient(body)
     except anthropic.APIError as e:
-        raise HTTPException(status_code=503, detail="AI service temporarily unavailable. Please try again.")
+        logging.exception("API error"); raise HTTPException(status_code=503, detail="AI service temporarily unavailable. Please try again.")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Something went wrong. Please try again.")
+        logging.exception("Unexpected error"); raise HTTPException(status_code=500, detail="Something went wrong. Please try again.")
 
 
 @router.post("/find-gifts", response_model=FindGiftsResponse)
@@ -95,9 +96,9 @@ def find_gifts(body: RefineRequest) -> FindGiftsResponse:
             total_candidates=total,
         )
     except anthropic.APIError as e:
-        raise HTTPException(status_code=503, detail="AI service temporarily unavailable. Please try again.")
+        logging.exception("API error"); raise HTTPException(status_code=503, detail="AI service temporarily unavailable. Please try again.")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Something went wrong. Please try again.")
+        logging.exception("Unexpected error"); raise HTTPException(status_code=500, detail="Something went wrong. Please try again.")
 
 
 class CompareRequest(BaseModel):
@@ -213,6 +214,6 @@ def gift_message(body: GiftMessageRequest) -> GiftMessageResponse:
         )
         return GiftMessageResponse(message=msg)
     except anthropic.APIError as e:
-        raise HTTPException(status_code=503, detail="AI service temporarily unavailable. Please try again.")
+        logging.exception("API error"); raise HTTPException(status_code=503, detail="AI service temporarily unavailable. Please try again.")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Something went wrong. Please try again.")
+        logging.exception("Unexpected error"); raise HTTPException(status_code=500, detail="Something went wrong. Please try again.")
