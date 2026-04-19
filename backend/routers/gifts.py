@@ -120,9 +120,16 @@ class CompareResponse(BaseModel):
 
 
 def _store_search_url(store: str, product_name: str) -> str:
-    """Build a direct search URL for known stores."""
+    """Build a direct search URL for known stores using simplified product name."""
+    import urllib.parse
+    # Simplify product name: take first 4-5 meaningful words for better store search results
+    words = product_name.replace("/", " ").replace("-", " ").split()
+    # Remove common filler words
+    skip = {"the", "a", "an", "for", "and", "with", "in", "of", "by", "to", "from", "set", "kit", "pack", "new"}
+    clean = [w for w in words if w.lower() not in skip][:5]
+    q = urllib.parse.quote_plus(" ".join(clean))
+
     s = store.lower().strip()
-    q = product_name
     if "amazon" in s:
         return f"https://www.amazon.com/s?k={q}"
     if "walmart" in s:
@@ -145,8 +152,10 @@ def _store_search_url(store: str, product_name: str) -> str:
         return f"https://www.nordstrom.com/sr?keyword={q}"
     if "poshmark" in s:
         return f"https://poshmark.com/search?query={q}"
-    # Fallback: Google Shopping filtered by store
-    return f"https://www.google.com/search?tbm=shop&q={q}+site:{store}"
+    if "wayfair" in s:
+        return f"https://www.wayfair.com/keyword.php?keyword={q}"
+    # Fallback: Google Shopping with store name
+    return f"https://www.google.com/search?tbm=shop&q={q}+{urllib.parse.quote_plus(store)}"
 
 
 @router.post("/compare-prices", response_model=CompareResponse)
