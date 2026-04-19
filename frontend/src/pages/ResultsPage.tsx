@@ -15,6 +15,7 @@ export function ResultsPage({ onShowWishlist }: { onShowWishlist: () => void }) 
   // Budget filter max = user's original max budget
   const [filterBudget, setFilterBudget] = useState<number>(budget_max);
   const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [layout, setLayout] = useState<"grid" | "list">("grid");
 
   // Refine panel state
   const [showRefine, setShowRefine] = useState(false);
@@ -180,11 +181,23 @@ export function ResultsPage({ onShowWishlist }: { onShowWishlist: () => void }) 
               <h2 className="font-display text-2xl font-semibold text-gray-900">
                 Top Gift Picks
               </h2>
-              <span className="text-sm text-gray-500">
-                {filtered.length} of {results.length} shown
-              </span>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-gray-500">
+                  {filtered.length} of {results.length}
+                </span>
+                <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+                  <button
+                    onClick={() => setLayout("grid")}
+                    className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${layout === "grid" ? "bg-phia-500 text-white" : "bg-white text-gray-400 hover:text-gray-600"}`}
+                  >⊞</button>
+                  <button
+                    onClick={() => setLayout("list")}
+                    className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${layout === "list" ? "bg-phia-500 text-white" : "bg-white text-gray-400 hover:text-gray-600"}`}
+                  >☰</button>
+                </div>
+              </div>
             </div>
-            {profile && <GiftGrid results={filtered} profile={profile} />}
+            {profile && <GiftGrid results={filtered} profile={profile} layout={layout} />}
           </div>
         </div>
       </main>
