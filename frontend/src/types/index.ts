@@ -93,9 +93,9 @@ export interface CompareResponse {
 export const OCCASIONS = [
   { value: "birthday", label: "🎂 Birthday" },
   { value: "anniversary", label: "💝 Anniversary" },
-  { value: "holiday", label: "🎄 Holiday / Christmas" },
+  { value: "holiday", label: "🎄 Holiday" },
   { value: "graduation", label: "🎓 Graduation" },
-  { value: "valentines", label: "💘 Valentine's Day" },
+  { value: "valentines", label: "💘 Valentine's" },
   { value: "date-night", label: "🌹 Date Night" },
   { value: "wedding", label: "💍 Wedding" },
   { value: "housewarming", label: "🏠 Housewarming" },
