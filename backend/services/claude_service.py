@@ -153,6 +153,7 @@ Explanation rules:
 - MUST reference specific interests or traits — never be generic
 - Mention what makes this gift SPECIAL, not just what it is
 - If strong reviews, mention as a trust signal
+- For the #1 ranked item ONLY: add a final sentence explaining why it's the top pick over the others (e.g., "This edges out other options because it combines two of their passions in one gift.")
 
 why_this_store: Brief note if from a well-known retailer, null otherwise."""
 
