@@ -173,9 +173,24 @@ _MESSAGE_SYSTEM = """You write warm, personal gift card messages. Return ONLY th
 
 def _extract_json(text: str) -> str:
     text = text.strip()
+    # Try markdown code block first
     match = re.search(r"```(?:json)?\s*([\s\S]*?)```", text)
     if match:
         return match.group(1).strip()
+    # Try to find JSON array or object
+    for start_char, end_char in [("[", "]"), ("{", "}")]:
+        start = text.find(start_char)
+        if start == -1:
+            continue
+        # Find matching closing bracket
+        depth = 0
+        for i in range(start, len(text)):
+            if text[i] == start_char:
+                depth += 1
+            elif text[i] == end_char:
+                depth -= 1
+                if depth == 0:
+                    return text[start:i + 1]
     return text
 
 
