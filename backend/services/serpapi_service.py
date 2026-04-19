@@ -34,7 +34,7 @@ def _search_one(query: str, budget_min: float, budget_max: float) -> List[dict]:
         items = r.json().get("shopping_results", [])
         return [
             i for i in items
-            if budget_min * 0.7 <= float(i.get("extracted_price") or 0) <= budget_max * 1.3
+            if budget_min <= float(i.get("extracted_price") or 0) <= budget_max * 1.2
             and i.get("extracted_price")
         ]
     except Exception:

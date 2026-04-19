@@ -32,7 +32,7 @@ def get_candidates(
 ) -> Tuple[List[CandidateTuple], int]:
     all_products = _load_products()
 
-    budget_low = profile.budget_min * 0.9
+    budget_low = profile.budget_min
     budget_high = profile.budget_max * 1.1
     budget_filtered = [
         p for p in all_products if budget_low <= p.price <= budget_high
