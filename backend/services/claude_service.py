@@ -171,18 +171,21 @@ Return ONLY a JSON array of 8 query strings — no markdown, no explanation."""
 _MESSAGE_SYSTEM = """You write warm, personal gift card messages. Return ONLY the message text — no quotes, no markdown."""
 
 
-def _extract_json(text: str) -> str:
+def _extract_json(text: str, expect_array: bool = False) -> str:
     text = text.strip()
     # Try markdown code block first
     match = re.search(r"```(?:json)?\s*([\s\S]*?)```", text)
     if match:
         return match.group(1).strip()
-    # Try to find JSON array or object
-    for start_char, end_char in [("[", "]"), ("{", "}")]:
+    # Determine search order based on expected type
+    if expect_array:
+        pairs = [("[", "]"), ("{", "}")]
+    else:
+        pairs = [("{", "}"), ("[", "]")]
+    for start_char, end_char in pairs:
         start = text.find(start_char)
         if start == -1:
             continue
-        # Find matching closing bracket
         depth = 0
         for i in range(start, len(text)):
             if text[i] == start_char:
@@ -266,7 +269,7 @@ def score_and_explain(
         system=_SCORE_SYSTEM,
         messages=[{"role": "user", "content": user_msg}],
     )
-    raw = _extract_json(response.content[0].text)
+    raw = _extract_json(response.content[0].text, expect_array=True)
     scored = json.loads(raw)
 
     results: list[GiftResult] = []
@@ -331,7 +334,7 @@ def generate_gift_queries(profile: RecipientProfile) -> List[str]:
         system=_QUERY_SYSTEM,
         messages=[{"role": "user", "content": user_msg}],
     )
-    raw = _extract_json(response.content[0].text)
+    raw = _extract_json(response.content[0].text, expect_array=True)
     queries = json.loads(raw)
     return [str(q) for q in queries[:8]]
 
