@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useReducer,
   type ReactNode,
 } from "react";
@@ -12,6 +13,18 @@ import type {
   GiftResult,
   RecipientProfile,
 } from "../types";
+
+const SESSION_KEY = "phia-results";
+
+function loadSession(): Partial<GiftState> {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (!raw) return {};
+    const data = JSON.parse(raw);
+    if (data.phase === "done" && data.results?.length) return data;
+    return {};
+  } catch { return {}; }
+}
 
 interface GiftState {
   phase: AppPhase;
@@ -28,18 +41,20 @@ interface GiftState {
   error: string | null;
 }
 
+const saved = loadSession();
+
 const initialState: GiftState = {
-  phase: "idle",
-  description: "",
-  budget_min: 25,
-  budget_max: 100,
-  occasion: "birthday",
-  gender: "not specified",
-  additional_context: "",
+  phase: (saved.phase as AppPhase) || "idle",
+  description: saved.description || "",
+  budget_min: saved.budget_min ?? 25,
+  budget_max: saved.budget_max ?? 100,
+  occasion: saved.occasion || "birthday",
+  gender: saved.gender || "not specified",
+  additional_context: saved.additional_context || "",
   followup_questions: [],
-  profile: null,
-  results: [],
-  total_candidates: 0,
+  profile: saved.profile || null,
+  results: saved.results || [],
+  total_candidates: saved.total_candidates || 0,
   error: null,
 };
 
@@ -98,6 +113,16 @@ const DispatchCtx = createContext<React.Dispatch<Action>>(() => {});
 
 export function GiftProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  // Persist results to sessionStorage
+  useEffect(() => {
+    if (state.phase === "done") {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(state));
+    } else if (state.phase === "idle") {
+      sessionStorage.removeItem(SESSION_KEY);
+    }
+  }, [state.phase, state.results]);
+
   return (
     <StateCtx.Provider value={state}>
       <DispatchCtx.Provider value={dispatch}>{children}</DispatchCtx.Provider>

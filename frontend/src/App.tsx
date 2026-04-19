@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { GiftProvider, useGiftState } from "./store/giftStore";
+import { WishlistProvider } from "./store/wishlist";
 import { SearchPage } from "./pages/SearchPage";
 import { FollowUpPage } from "./pages/FollowUpPage";
 import { ResultsPage } from "./pages/ResultsPage";
@@ -27,8 +28,10 @@ function AppInner() {
 
 export default function App() {
   return (
-    <GiftProvider>
-      <AppInner />
-    </GiftProvider>
+    <WishlistProvider>
+      <GiftProvider>
+        <AppInner />
+      </GiftProvider>
+    </WishlistProvider>
   );
 }
