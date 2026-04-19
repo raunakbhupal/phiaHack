@@ -26,10 +26,6 @@ export function SearchPage({ onShowWishlist }: { onShowWishlist: () => void }) {
           <button onClick={onShowWishlist} className="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 hover:bg-phia-50 hover:border-phia-200 hover:text-phia-600 transition-colors">
             ♥ Wishlist{count > 0 && <span className="bg-phia-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">{count}</span>}
           </button>
-          <span className="flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-green-400 inline-block" />
-            Powered by Claude AI
-          </span>
         </div>
       </header>
 
@@ -66,7 +62,7 @@ export function SearchPage({ onShowWishlist }: { onShowWishlist: () => void }) {
             <p className="text-xs font-semibold uppercase tracking-widest text-gray-300 text-center mb-4">
               Try an example
             </p>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
               {EXAMPLES.map((ex, i) => (
                 <button
                   key={i}
@@ -78,7 +74,7 @@ export function SearchPage({ onShowWishlist }: { onShowWishlist: () => void }) {
                       textarea.dispatchEvent(new Event("input", { bubbles: true }));
                     }
                   }}
-                  className="text-left text-sm text-gray-400 rounded-xl bg-gray-50 hover:bg-phia-50 px-5 py-3 transition-all border border-transparent hover:border-phia-100 hover:text-gray-600 line-clamp-1"
+                  className="text-left text-sm text-gray-400 rounded-xl bg-gray-50 hover:bg-phia-50 px-5 py-3.5 transition-all border border-transparent hover:border-phia-100 hover:text-gray-600 leading-relaxed"
                 >
                   <span className="text-phia-400 mr-2">→</span>
                   {ex}
