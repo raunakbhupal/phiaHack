@@ -96,7 +96,7 @@ export function GiftListItem({ result, rank }: { result: GiftResult; rank: numbe
           <div className="flex gap-2 mt-auto pt-1">
             <a href={amazonUrl} target="_blank" rel="noopener noreferrer"
               className="rounded-full bg-phia-600 text-white text-xs font-semibold px-4 py-1.5 hover:bg-phia-700 transition-colors no-underline">
-              <span className="bg-white/20 rounded px-0.5 mr-1">🛒</span> Amazon
+              Amazon
             </a>
             <button onClick={() => setShowWhy(!showWhy)}
               className="rounded-full border border-phia-200 bg-phia-50 text-xs font-semibold text-phia-700 px-3 py-1.5 hover:bg-phia-100 transition-colors">

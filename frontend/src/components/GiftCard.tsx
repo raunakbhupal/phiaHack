@@ -266,7 +266,7 @@ function WhyModal({
           <div className="flex gap-2 pt-2 border-t border-gray-100">
             <a href={amazonUrl} target="_blank" rel="noopener noreferrer"
               className="btn-primary text-sm py-2.5 flex-1 text-center no-underline">
-              <span className="bg-white/20 rounded-md px-1 py-0.5 mr-1">🛒</span> Buy on Amazon
+              Buy on Amazon
             </a>
           </div>
         </div>
@@ -393,7 +393,7 @@ export function GiftCard({
               rel="noopener noreferrer"
               className="btn-primary text-sm py-2.5 w-full text-center no-underline"
             >
-              <span className="bg-white/20 rounded-md px-1 py-0.5 mr-1">🛒</span> Buy on Amazon
+              Buy on Amazon
             </a>
             <div className="flex gap-2">
               <button
