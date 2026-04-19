@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { useSubmitSearch } from "../store/giftStore";
 import { OCCASIONS } from "../types";
+import { CustomSelect } from "./CustomSelect";
+
+const GENDER_OPTIONS = [
+  { value: "not specified", label: "Any" },
+  { value: "male", label: "👨 Male" },
+  { value: "female", label: "👩 Female" },
+  { value: "non-binary", label: "🧑 Non-binary" },
+];
 
 export function RecipientForm() {
   const submitSearch = useSubmitSearch();
@@ -76,27 +84,10 @@ export function RecipientForm() {
           </div>
         </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Occasion</label>
-          <select
-            value={occasion} onChange={(e) => setOccasion(e.target.value)}
-            className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm text-gray-900
-              focus:outline-none focus:ring-2 focus:ring-phia-300 focus:border-transparent focus:bg-white transition-all"
-          >
-            {OCCASIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
+          <CustomSelect label="Occasion" options={OCCASIONS} value={occasion} onChange={setOccasion} />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Gender</label>
-          <select
-            value={gender} onChange={(e) => setGender(e.target.value)}
-            className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3 py-2.5 text-sm text-gray-900
-              focus:outline-none focus:ring-2 focus:ring-phia-300 focus:border-transparent focus:bg-white transition-all"
-          >
-            <option value="not specified">Any</option>
-            <option value="male">👨 Male</option>
-            <option value="female">👩 Female</option>
-            <option value="non-binary">🧑 Non-binary</option>
-          </select>
+          <CustomSelect label="Gender" options={GENDER_OPTIONS} value={gender} onChange={setGender} />
         </div>
       </div>
 
