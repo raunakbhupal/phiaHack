@@ -88,7 +88,7 @@ export function SearchPage({ onShowWishlist }: { onShowWishlist: () => void }) {
             {[
               { value: "Multi-store", sub: "Amazon, Etsy, Target & more" },
               { value: "AI-ranked", sub: "Reviews + sentiment + fit" },
-              { value: "8 picks", sub: "Diverse across all interests" },
+              { value: "9 picks", sub: "Diverse across all interests" },
             ].map(({ value, sub }) => (
               <div key={value} className="text-center">
                 <div className="font-semibold text-gray-900 text-sm">{value}</div>

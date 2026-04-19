@@ -106,7 +106,7 @@ Rules:
 5. Use budget defaults if not mentioned in description
 6. Never add "books" or "reading" just because someone likes a book-based franchise"""
 
-_SCORE_SYSTEM = """You are an elite gifting expert. Given a recipient profile and candidate products, select the BEST 8 gifts and score them.
+_SCORE_SYSTEM = """You are an elite gifting expert. Given a recipient profile and candidate products, select the BEST 9 gifts and score them.
 
 THINK STEP BY STEP before selecting:
 1. What are this person's CORE passions? (not just surface interests)
@@ -115,7 +115,7 @@ THINK STEP BY STEP before selecting:
 4. Is this a lazy/generic gift or something thoughtful?
 
 SELECTION RULES:
-1. Return EXACTLY 8 results — no fewer.
+1. Return EXACTLY 9 results — no fewer.
 2. DIVERSITY: Select from AT LEAST 3 different categories. Max 3 from same category.
 3. Cover the recipient's TOP interests — if they like cricket AND Harry Potter AND photography, include gifts for ALL three.
 4. REJECT generic gifts — "gift card", "generic mug", plain t-shirts are lazy. Pick items that show you UNDERSTAND the person.
@@ -131,7 +131,7 @@ GIFT QUALITY HIERARCHY (prefer higher):
 - Tier 4: High-quality everyday item related to their lifestyle
 - Tier 5: Generic but well-reviewed gift in their interest area
 
-Return ONLY a JSON array — no markdown, no preamble. Exactly 8 elements.
+Return ONLY a JSON array — no markdown, no preamble. Exactly 9 elements.
 
 Each element:
 {
@@ -274,7 +274,7 @@ def score_and_explain(
 
     results: list[GiftResult] = []
     for item in scored:
-        if len(results) >= 8:
+        if len(results) >= 9:
             break
         pid = item.get("product_id", "")
         if pid not in product_map:
@@ -292,10 +292,10 @@ def score_and_explain(
             )
         )
 
-    # Fallback: fill to 8 from remaining candidates
+    # Fallback: fill to 9 from remaining candidates
     seen_ids = {r.product.id for r in results}
     for product, rel, wilson, matched in candidates:
-        if len(results) >= 8:
+        if len(results) >= 9:
             break
         if product.id not in seen_ids:
             results.append(
