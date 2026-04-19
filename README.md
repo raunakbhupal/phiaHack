@@ -15,26 +15,28 @@ Built for the [Phia](https://phia.com/) Hackathon.
 ## How It Works
 
 ```
-User describes recipient → AI extracts personality & interests
-                         → Generates targeted search queries
+User describes recipient → AI asks smart follow-up questions (if needed)
+                         → Extracts personality & interests
+                         → Generates 8 targeted search queries
                          → Searches Google Shopping in parallel
+                         → Enforces diversity across categories
                          → Ranks by match score + review confidence
-                         → Returns 12 diverse, personalized gift picks
+                         → Returns 9 personalized gift picks
 ```
 
-**1. Describe the recipient** — free-text about who they are, what they love, the occasion, and your budget.
+**1. Describe the recipient** — free-text about who they are, what they love, the occasion, gender, and your budget.
 
-**2. AI follow-up** — if the description is vague, Claude asks 1–3 clarifying questions to sharpen results.
+**2. AI follow-up chat** — if details are missing (age, specific interests, personality), the AI asks 1–3 clarifying questions in a chat-style interface before searching.
 
-**3. Smart search** — Claude generates 8 diverse search queries (covering every interest), SerpAPI searches Google Shopping in parallel across Amazon, Etsy, Target, and more.
+**3. Smart search** — Claude generates 8 diverse search queries (covering every interest with budget-appropriate terms), SerpAPI searches Google Shopping in parallel with price range filters.
 
-**4. Diversity-enforced ranking** — results are capped at 4 per category before Claude scores them, ensuring you get gifts across all interests (not 12 jerseys).
+**4. Diversity-enforced ranking** — results are capped at 4 per category before Claude scores them, ensuring you get gifts across all interests (not 9 jerseys).
 
 **5. Confidence-weighted scoring** — each gift is ranked using:
 - **Semantic match** to recipient interests (via Claude)
 - **Wilson score** review confidence (not just star ratings)
 - **Price fit** within budget range
-- **Store trust** signals
+- **Gift quality tier** (hobby enabler > unique fandom item > creative crossover > everyday item)
 
 **6. Refine without restarting** — adjust budget or add details from the results page and re-search instantly.
 
@@ -44,15 +46,17 @@ User describes recipient → AI extracts personality & interests
 
 | Feature | Description |
 |---|---|
-| 🧠 **AI Recipient Parsing** | Claude extracts interests, personality traits, age, relationship from natural language |
-| 🤔 **Smart Follow-ups** | Asks clarifying questions only when the description is too vague |
-| 🌍 **Live Product Search** | SerpAPI searches Google Shopping across 40k+ stores in parallel |
+| 🧠 **AI Recipient Parsing** | Claude extracts interests, personality traits, age, relationship, gender from natural language |
+| 💬 **Chat-Style Follow-ups** | Interactive one-question-at-a-time chat when details are missing |
+| 🌍 **Live Product Search** | SerpAPI searches Google Shopping across 40k+ stores in parallel with price filters |
 | 🎯 **Diversity Enforcement** | Max 4 products per category — covers all interests, not just the dominant one |
 | 📊 **Wilson Score Ranking** | Review confidence based on statistical lower bound, not naive star averages |
-| 💡 **"Why This Gift?" Modal** | AI-generated explanation of why each gift fits the recipient |
-| 🛒 **Smart Buy Links** | Price-filtered Amazon search + Google Shopping comparison |
+| 💡 **"Why This Gift?" Modal** | AI-generated explanation of why each gift fits the recipient — #1 pick explains why it's the top choice |
+| 🔍 **Compare Prices** | Inline price comparison across stores (Amazon, Walmart, Target, Etsy, etc.) |
+| 💜 **Wishlist** | Save gifts for later with localStorage persistence |
 | ✏️ **Refine from Results** | Adjust budget or add forgotten details without starting over |
-| 🏪 **Store Badges** | Shows which store each product comes from |
+| 🏪 **Store Badges** | Shows which store each product comes from with direct store links |
+| 👤 **Gender & Occasion Aware** | 10 occasions, gender selection — AI tailors results accordingly |
 | 📱 **Responsive UI** | Works on desktop, tablet, and mobile |
 
 ---
@@ -64,28 +68,30 @@ User describes recipient → AI extracts personality & interests
 | **Frontend** | React 18, TypeScript, Vite, Tailwind CSS |
 | **Backend** | Python, FastAPI, Pydantic |
 | **AI** | Claude Sonnet (Anthropic API) — recipient parsing, query generation, scoring & explanations |
-| **Search** | SerpAPI (Google Shopping) — live product search with parallel execution |
-| **Scoring** | Wilson score lower bound, tag matching, occasion matching, price fit |
+| **Search** | SerpAPI (Google Shopping) — live product search with parallel execution + price filters |
+| **Scoring** | Wilson score lower bound, tag matching, occasion matching, price fit, gift quality tiers |
+| **Storage** | localStorage for wishlist persistence |
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────┐     POST /api/find-gifts     ┌──────────────────┐
-│   React UI  │ ──────────────────────────▶  │   FastAPI Server  │
-│  (Vite/TS)  │ ◀──────────────────────────  │                  │
-└─────────────┘     FindGiftsResponse         │  1. Claude: parse │
-                                              │  2. Claude: queries│
-                                              │  3. SerpAPI: search│
-                                              │  4. Diversity filter│
-                                              │  5. Claude: rank   │
-                                              └──────────────────┘
+┌─────────────┐                              ┌──────────────────┐
+│   React UI  │  POST /api/check-followup    │   FastAPI Server  │
+│  (Vite/TS)  │ ──────────────────────────▶  │                  │
+│             │  POST /api/find-gifts        │  1. Claude: parse │
+│  • Chat     │ ──────────────────────────▶  │  2. Claude: queries│
+│  • Grid     │                              │  3. SerpAPI: search│
+│  • Wishlist │ ◀──────────────────────────  │  4. Diversity filter│
+│  • Compare  │     FindGiftsResponse        │  5. Claude: rank   │
+└─────────────┘                              └──────────────────┘
 ```
 
 **API Endpoints:**
 - `POST /api/check-followup` — analyze if description needs clarification
 - `POST /api/find-gifts` — full pipeline: parse → search → rank → explain
+- `POST /api/compare-prices` — real-time price comparison across stores
 - `POST /api/gift-message` — generate personalized gift card message
 - `GET /health` — health check
 
@@ -138,7 +144,7 @@ phiaHack/
 │   │   ├── recipient.py         # RecipientInput, RecipientProfile
 │   │   └── gift.py              # Product, GiftResult, FindGiftsResponse
 │   ├── routers/
-│   │   └── gifts.py             # API endpoints
+│   │   └── gifts.py             # API endpoints + price comparison
 │   ├── services/
 │   │   ├── claude_service.py    # All Claude AI interactions
 │   │   ├── serpapi_service.py   # Google Shopping search + diversity
@@ -157,19 +163,23 @@ phiaHack/
         ├── index.css
         ├── api/client.ts        # API client
         ├── types/index.ts       # TypeScript interfaces
-        ├── store/giftStore.tsx   # State management (useReducer)
+        ├── store/
+        │   ├── giftStore.tsx    # App state (useReducer + sessionStorage)
+        │   └── wishlist.tsx     # Wishlist context (localStorage)
         ├── pages/
         │   ├── SearchPage.tsx    # Landing page with form
-        │   ├── FollowUpPage.tsx  # AI follow-up questions
-        │   └── ResultsPage.tsx   # Gift grid with filters
+        │   ├── FollowUpPage.tsx  # Chat-style AI follow-up questions
+        │   ├── ResultsPage.tsx   # Gift grid with filters + refine
+        │   └── WishlistPage.tsx  # Saved gifts
         └── components/
-            ├── RecipientForm.tsx
-            ├── RecipientCard.tsx
-            ├── GiftCard.tsx      # Card + WhyModal
-            ├── GiftGrid.tsx
-            ├── ScoreRing.tsx
-            ├── BudgetSlider.tsx
-            └── LoadingOverlay.tsx
+            ├── RecipientForm.tsx  # Input form with custom dropdowns
+            ├── CustomSelect.tsx   # Styled dropdown component
+            ├── RecipientCard.tsx  # Profile summary sidebar
+            ├── GiftCard.tsx       # Card + WhyModal + CompareModal
+            ├── GiftGrid.tsx       # 3×3 responsive grid
+            ├── ScoreRing.tsx      # Animated match score ring
+            ├── BudgetSlider.tsx   # Price filter slider
+            └── LoadingOverlay.tsx # 3-phase loading animation
 ```
 
 ---
@@ -189,6 +199,13 @@ wilson = (p + z²/2n - z√(p(1-p)/n + z²/4n²)) / (1 + z²/n)
 ```
 
 A 4.5★ product with 5,000 reviews scores higher than a 5.0★ product with 3 reviews.
+
+**Gift Quality Tiers** (Claude prioritizes higher tiers):
+1. Directly enables their hobby/passion
+2. Celebrates their fandom in a unique way
+3. Combines two interests creatively
+4. High-quality everyday item related to their lifestyle
+5. Generic but well-reviewed gift in their interest area
 
 **Diversity Enforcement** — before Claude sees the candidates, products are capped at 4 per category. This prevents a single interest from dominating results.
 
