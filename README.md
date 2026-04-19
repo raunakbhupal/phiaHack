@@ -1,6 +1,8 @@
-# ✦ Phia Gifts — AI-Powered Gift Discovery
+# ✦ Phia Gifting — AI-Powered Gift Discovery
 
 > Describe the person, not the product. Our AI searches the internet and finds gifts matched to their personality, interests, and your budget.
+
+🔗 **[Try it live → phia-gifts-ui.onrender.com](https://phia-gifts-ui.onrender.com/)**
 
 Built for the [Phia](https://phia.com/) Hackathon.
 
