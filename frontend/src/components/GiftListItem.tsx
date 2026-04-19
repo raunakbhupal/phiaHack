@@ -1,5 +1,6 @@
-import { useState } from "react";
-import type { GiftResult } from "../types";
+import { useEffect, useState } from "react";
+import type { GiftResult, PriceOption } from "../types";
+import { comparePrices } from "../api/client";
 import { useWishlist } from "../store/wishlist";
 
 function formatReviewCount(n: number): string {
@@ -20,11 +21,49 @@ function scoreColor(score: number): string {
   return "text-red-500 bg-red-50 border-red-200";
 }
 
+function buildGoogleShoppingUrl(name: string): string {
+  return `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(name)}`;
+}
+
+function CompareInline({ productName, price }: { productName: string; price: number }) {
+  const [options, setOptions] = useState<PriceOption[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    comparePrices(productName, price)
+      .then((r) => setOptions(r.options))
+      .catch(() => setOptions([]))
+      .finally(() => setLoading(false));
+  }, [productName, price]);
+
+  if (loading) return <p className="text-xs text-gray-400 py-2">Searching stores...</p>;
+  if (options.length === 0) {
+    return (
+      <a href={buildGoogleShoppingUrl(productName)} target="_blank" rel="noopener noreferrer"
+        className="text-xs text-phia-600 font-semibold hover:underline">
+        Search Google Shopping →
+      </a>
+    );
+  }
+  return (
+    <div className="flex flex-wrap gap-2 py-1">
+      {options.slice(0, 4).map((opt, i) => (
+        <a key={i} href={opt.url || "#"} target="_blank" rel="noopener noreferrer"
+          className="text-xs rounded-full border border-gray-200 px-3 py-1 hover:bg-phia-50 hover:border-phia-200 transition-colors no-underline text-gray-600">
+          <span className="font-bold text-gray-900">${opt.price.toFixed(2)}</span> · {opt.store}
+          {i === 0 && <span className="text-green-600 ml-1 font-semibold">Best</span>}
+        </a>
+      ))}
+    </div>
+  );
+}
+
 export function GiftListItem({ result, rank }: { result: GiftResult; rank: number }) {
   const { product, match_score, explanation, wilson_score } = result;
   const { toggle, isWishlisted } = useWishlist();
   const wishlisted = isWishlisted(product.id);
   const [showWhy, setShowWhy] = useState(false);
+  const [showCompare, setShowCompare] = useState(false);
   const amazonUrl = buildAmazonUrl(product.name, product.price);
 
   return (
@@ -80,29 +119,29 @@ export function GiftListItem({ result, rank }: { result: GiftResult; rank: numbe
             </div>
           </div>
 
-          {/* Why toggle */}
-          <button
-            onClick={() => setShowWhy(!showWhy)}
-            className="text-left text-xs font-semibold text-phia-600 hover:text-phia-700 transition-colors flex items-center gap-1"
-          >
-            <span className={`transition-transform duration-200 inline-block text-[10px] ${showWhy ? "rotate-90" : ""}`}>▶</span>
-            Why this gift?
-          </button>
-          {showWhy && (
-            <p className="text-xs text-gray-500 leading-relaxed bg-phia-50 rounded-lg px-3 py-2">{explanation}</p>
-          )}
-
           {/* Actions */}
           <div className="flex gap-2 mt-auto pt-1">
             <a href={amazonUrl} target="_blank" rel="noopener noreferrer"
               className="rounded-full bg-phia-600 text-white text-xs font-semibold px-4 py-1.5 hover:bg-phia-700 transition-colors no-underline">
               Amazon →
             </a>
+            <button onClick={() => setShowCompare(!showCompare)}
+              className="rounded-full border border-gray-200 bg-white text-xs font-semibold text-gray-600 px-3 py-1.5 hover:bg-gray-50 transition-colors">
+              🔍 Compare
+            </button>
             <button onClick={() => setShowWhy(!showWhy)}
               className="rounded-full border border-phia-200 bg-phia-50 text-xs font-semibold text-phia-700 px-3 py-1.5 hover:bg-phia-100 transition-colors">
               💡 Why?
             </button>
           </div>
+
+          {showWhy && (
+            <p className="text-xs text-gray-500 leading-relaxed bg-phia-50 rounded-lg px-3 py-2">{explanation}</p>
+          )}
+
+          {showCompare && (
+            <CompareInline productName={product.name} price={product.price} />
+          )}
         </div>
       </div>
     </div>
