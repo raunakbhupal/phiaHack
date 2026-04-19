@@ -2,7 +2,9 @@
 
 ## Inspiration
 
-Last week I spent hours trying to find a birthday gift for a friend who's into yoga and loves Lululemon. Every site I tried just showed me generic yoga mats or the same Lululemon gift card. None of them understood that she's a specific person with specific taste — they just matched keywords. That's when it hit me: recommendation systems today are built for the shopper, not for gift-giving. And gift-giving is a fundamentally different problem.
+A few weeks back I spent hours trying to find a birthday gift for a friend who's into yoga and loves Lululemon. Every site I tried just showed me generic yoga mats or the same Lululemon gift card. None of them understood that she's a specific person with specific taste. I ended up buying a gift card — and it felt lazy, like I hadn't put any thought into it.
+
+But this isn't just my problem. Everyone faces it. We've all been there — scrolling endlessly, giving up, and defaulting to a gift card because nothing feels right. Gift cards say "I couldn't figure out what you'd like." A great gift says "I know you." That gap is what Phia Gifting solves.
 
 ## Why this problem?
 
