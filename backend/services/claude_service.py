@@ -120,7 +120,7 @@ SELECTION RULES:
 3. Cover the recipient's TOP interests — if they like cricket AND Harry Potter AND photography, include gifts for ALL three.
 4. REJECT generic gifts — "gift card", "generic mug", plain t-shirts are lazy. Pick items that show you UNDERSTAND the person.
 5. PREFER products with high review counts — a 4.5★ with 2000 reviews beats 5★ with 3 reviews.
-6. MIX price points within the budget range.
+6. MIX price points within the budget range — if budget is $0-$300, include items at $50, $150, AND $250+ levels. Don't cluster everything at the low end.
 7. Consider GENDER if specified — don't suggest women's jewelry for a male recipient or vice versa.
 8. Think about OCCASION — birthday gifts should feel celebratory, holiday gifts can be cozy/festive.
 
@@ -325,7 +325,8 @@ def generate_gift_queries(profile: RecipientProfile) -> List[str]:
         f"Generate 8 Google Shopping queries. MANDATORY: at least 2 queries per major interest area. "
         f"The interests are: {interests_str}. "
         f"Each query must target a DIFFERENT product type (jersey, figurine, equipment, book, accessory, decor, gadget, art). "
-        f"Be very specific — e.g. 'Messi Argentina signed poster wall art' not 'football gift'. "
+        f"IMPORTANT: Budget is ${profile.budget_min:.0f}–${profile.budget_max:.0f} — include price-appropriate terms like 'premium', 'luxury', 'high-end', or 'professional' for budgets over $100. "
+        f"Be very specific — e.g. 'premium classical music veena instrument' not 'music gift'. "
         f"Return ONLY a JSON array: [\"query1\", ...]"
     )
     response = _get_client().messages.create(

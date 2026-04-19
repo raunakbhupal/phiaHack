@@ -26,6 +26,7 @@ def _search_one(query: str, budget_min: float, budget_max: float) -> List[dict]:
         "num": 15,
         "gl": "us",
         "hl": "en",
+        "tbs": f"mr:1,price:1,ppr_min:{int(budget_min)},ppr_max:{int(budget_max)}",
     }
     try:
         r = requests.get("https://serpapi.com/search", params=params, timeout=12)
